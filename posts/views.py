@@ -6,6 +6,8 @@ from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from core.mixins import OwnerRequiredMixin
+from notifications.models import Notification
+from notifications.services import create_notification
 
 from .forms import CommentForm, PostForm
 from .models import Comment, Like, Post
@@ -77,7 +79,13 @@ class ToggleLikeView(LoginRequiredMixin, View):
             like.delete()
         else:
             Like.objects.create(post=post, user=request.user)
-            # Notification à l'auteur du post (câblée en Phase 4).
+            create_notification(
+                recipient=post.author,
+                actor=request.user,
+                notification_type=Notification.Type.LIKE,
+                text=f'{request.user.username} a aimé ta publication',
+                link=post.get_absolute_url(),
+            )
         return redirect(request.META.get('HTTP_REFERER', reverse('home')))
 
 
@@ -92,8 +100,14 @@ class CommentCreateView(LoginRequiredMixin, View):
             comment.post = post
             comment.author = request.user
             comment.save()
+            create_notification(
+                recipient=post.author,
+                actor=request.user,
+                notification_type=Notification.Type.COMMENT,
+                text=f'{request.user.username} a commenté ta publication',
+                link=post.get_absolute_url(),
+            )
             messages.success(request, 'Commentaire ajouté.')
-            # Notification à l'auteur du post (câblée en Phase 4).
         else:
             messages.error(request, 'Ton commentaire est vide ou invalide.')
         return redirect(request.META.get('HTTP_REFERER', reverse('post_detail', kwargs={'pk': post.pk})))

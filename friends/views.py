@@ -3,8 +3,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView
+
+from notifications.models import Notification
+from notifications.services import create_notification
 
 from .models import Friendship
 
@@ -79,6 +83,13 @@ class SendFriendRequestView(LoginRequiredMixin, View):
             messages.error(request, 'Une demande est déjà en cours ou vous êtes déjà amis.')
         else:
             Friendship.objects.create(from_user=request.user, to_user=target)
+            create_notification(
+                recipient=target,
+                actor=request.user,
+                notification_type=Notification.Type.FRIEND_REQUEST,
+                text=f"{request.user.username} t'a envoyé une demande d'ami",
+                link=reverse('friend_requests'),
+            )
             messages.success(request, f"Demande d'ami envoyée à {target.username}.")
         return redirect('profile', username=target.username)
 
@@ -95,6 +106,13 @@ class AcceptFriendRequestView(LoginRequiredMixin, View):
         )
         friendship.status = Friendship.Status.ACCEPTED
         friendship.save(update_fields=['status', 'updated_at'])
+        create_notification(
+            recipient=friendship.from_user,
+            actor=request.user,
+            notification_type=Notification.Type.FRIEND_ACCEPTED,
+            text=f'{request.user.username} a accepté ta demande d\'ami',
+            link=reverse('profile', kwargs={'username': request.user.username}),
+        )
         messages.success(request, f"Vous êtes maintenant amis avec {friendship.from_user.username}.")
         return redirect('friend_list')
 
