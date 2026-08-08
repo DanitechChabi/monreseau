@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Conversation{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center gap-2">
+                {% if other_user.profile.avatar %}
+                    <img src="{{ other_user.profile.avatar.url }}" class="rounded-circle" width="32" height="32" style="object-fit:cover;" alt="Avatar">
+                {% else %}
+                    <i class="bi bi-person-circle text-muted" style="font-size:1.5rem;"></i>
+                {% endif %}
+                <a href="{% url 'profile' other_user.username %}" class="fw-bold text-decoration-none text-dark">
+                    {{ other_user.get_full_name|default:other_user.username }}
+                </a>
+            </div>
+
+            <div class="card-body" style="max-height:60vh;overflow-y:auto;" id="thread">
+                {% for m in conversation.messages.all %}
+                    <div class="d-flex mb-2 {% if m.sender == user %}justify-content-end{% endif %}">
+                        <div class="p-2 rounded {% if m.sender == user %}bg-primary text-white{% else %}bg-body-secondary{% endif %}"
+                             style="max-width:70%;word-wrap:break-word;">
+                            <div>{{ m.body|linebreaksbr }}</div>
+                            <div class="small {% if m.sender == user %}text-white-50{% else %}text-muted{% endif %}">
+                                {{ m.created_at|date:"d/m H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="card-footer">
+                <form method="post">
+                    {% csrf_token %}
+                    {% include '_form_fields.html' with form=message_form %}
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-send"></i> Envoyer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fait défiler le fil jusqu'en bas (dernier message) au chargement.
+    const thread = document.getElementById('thread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
+</script>
+{% endblock %}

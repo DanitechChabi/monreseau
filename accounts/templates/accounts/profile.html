@@ -34,10 +34,16 @@
                 <div class="mt-2 d-flex flex-column gap-2 align-items-end">
                     {% if user.is_authenticated and user != profile_user %}
                         {% if is_friend %}
-                            <form method="post" action="{% url 'unfriend' profile_user.id %}">
-                                {% csrf_token %}
-                                <button class="btn btn-outline-danger btn-sm"><i class="bi bi-person-dash"></i> Retirer de mes amis</button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <form method="post" action="{% url 'conversation_new' profile_user.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-primary btn-sm"><i class="bi bi-chat"></i> Message</button>
+                                </form>
+                                <form method="post" action="{% url 'unfriend' profile_user.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-outline-danger btn-sm"><i class="bi bi-person-dash"></i> Retirer</button>
+                                </form>
+                            </div>
                         {% elif friendship_pending %}
                             {% if pending_sent_by_me %}
                                 <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Demande envoyée</span>
