@@ -1,25 +1,49 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView
+from django.db.models import Q
+from django.views.generic import ListView
+
+from accounts.models import User
+from posts.forms import PostForm
+from posts.models import Post
 
 
-class HomeView(LoginRequiredMixin, TemplateView):
-    """Page d'accueil (fil d'actualité).
-
-    Version provisoire : le vrai fil (posts des amis + soi-même) arrive avec
-    l'app posts. Voir `core/views.py` réécrit en Phase 3.
-    """
+class HomeView(LoginRequiredMixin, ListView):
+    """Fil d'actualité : publications des amis et de soi-même."""
 
     template_name = 'core/home.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Post.objects.feed_for(self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['post_form'] = PostForm()
+        return context
 
 
-class SearchView(LoginRequiredMixin, TemplateView):
-    """Recherche de personnes.
-
-    Version provisoire : la recherche réelle (par nom / username) arrive en
-    Phase 3, une fois les modèles `accounts` et `friends` en place.
-    """
+class SearchView(LoginRequiredMixin, ListView):
+    """Recherche de personnes par pseudo, prénom ou nom."""
 
     template_name = 'core/search_results.html'
+    context_object_name = 'results'
+    paginate_by = 24
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '').strip()
+        if not q:
+            return User.objects.none()
+        return (
+            User.objects
+            .filter(
+                Q(username__icontains=q)
+                | Q(first_name__icontains=q)
+                | Q(last_name__icontains=q)
+            )
+            .select_related('profile')
+            .order_by('username')
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

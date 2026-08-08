@@ -1,0 +1,49 @@
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+            {% if post.author.profile.avatar %}
+                <img src="{{ post.author.profile.avatar.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit:cover;" alt="Avatar">
+            {% else %}
+                <i class="bi bi-person-circle me-2 text-muted" style="font-size:2.5rem;"></i>
+            {% endif %}
+            <div class="me-auto">
+                <a href="{% url 'profile' post.author.username %}" class="fw-bold text-decoration-none text-dark">
+                    {{ post.author.get_full_name|default:post.author.username }}
+                </a>
+                <div class="text-muted small">{{ post.created_at|timesince }} ago</div>
+            </div>
+
+            {% if post.author == user %}
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-label="Actions">
+                    <i class="bi bi-three-dots"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{% url 'post_update' post.pk %}"><i class="bi bi-pencil"></i> Modifier</a></li>
+                    <li><a class="dropdown-item text-danger" href="{% url 'post_delete' post.pk %}"><i class="bi bi-trash"></i> Supprimer</a></li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if post.content %}
+            <p class="mb-2">{{ post.content|linebreaksbr }}</p>
+        {% endif %}
+        {% if post.image %}
+            <img src="{{ post.image.url }}" class="img-fluid rounded mb-2" alt="Image de la publication">
+        {% endif %}
+
+        <div class="d-flex align-items-center gap-3 border-top pt-2">
+            <form method="post" action="{% url 'post_like' post.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm {% if request.user in post.likes.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    <i class="bi {% if request.user in post.likes.all %}bi-hand-thumbs-up-fill{% else %}bi-hand-thumbs-up{% endif %}"></i>
+                    {{ post.likes.count }}
+                </button>
+            </form>
+            <a href="{% url 'post_detail' post.pk %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-chat"></i> {{ post.comments.count }}
+            </a>
+        </div>
+    </div>
+</div>

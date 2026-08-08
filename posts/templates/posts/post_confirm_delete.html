@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer la publication{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h3 class="mb-3">Supprimer cette publication ?</h3>
+                {% if post.content %}
+                    <p class="text-muted">« {{ post.content|truncatechars:120 }} »</p>
+                {% else %}
+                    <p class="text-muted">Publication avec image uniquement.</p>
+                {% endif %}
+                <p class="text-danger small">Cette action est irréversible.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Oui, supprimer</button>
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary">Annuler</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
