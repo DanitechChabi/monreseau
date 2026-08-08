@@ -47,10 +47,23 @@ class ProfileView(DetailView):
         else:
             context['posts'] = []
 
-        # État de la relation d'amitié (rempli à la Phase 2).
+        # État de la relation d'amitié avec le visiteur.
+        from friends.models import Friendship
+        context['friend_count'] = len(Friendship.friend_ids(user))
         context['is_friend'] = False
         context['friendship_pending'] = False
-        context['friend_count'] = 0
+        context['friendship_pk'] = None
+        context['pending_sent_by_me'] = False
+
+        if self.request.user.is_authenticated and self.request.user != user:
+            friendship = Friendship.friendship_between(self.request.user, user)
+            if friendship is not None:
+                context['friendship_pk'] = friendship.pk
+                if friendship.status == Friendship.Status.ACCEPTED:
+                    context['is_friend'] = True
+                elif friendship.status == Friendship.Status.PENDING:
+                    context['friendship_pending'] = True
+                    context['pending_sent_by_me'] = friendship.from_user_id == self.request.user.id
         return context
 
 

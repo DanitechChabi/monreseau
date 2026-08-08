@@ -31,8 +31,40 @@
 
             <div class="text-end">
                 <span class="badge bg-secondary"><i class="bi bi-people"></i> {{ friend_count }} amis</span>
-                <div class="mt-2">
-                    {% block friend_actions %}{% endblock %}
+                <div class="mt-2 d-flex flex-column gap-2 align-items-end">
+                    {% if user.is_authenticated and user != profile_user %}
+                        {% if is_friend %}
+                            <form method="post" action="{% url 'unfriend' profile_user.id %}">
+                                {% csrf_token %}
+                                <button class="btn btn-outline-danger btn-sm"><i class="bi bi-person-dash"></i> Retirer de mes amis</button>
+                            </form>
+                        {% elif friendship_pending %}
+                            {% if pending_sent_by_me %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Demande envoyée</span>
+                                <form method="post" action="{% url 'cancel_friend_request' friendship_pk %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-outline-secondary btn-sm">Annuler la demande</button>
+                                </form>
+                            {% else %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-envelope-exclamation"></i> Demande reçue</span>
+                                <div class="d-flex gap-2">
+                                    <form method="post" action="{% url 'accept_friend_request' friendship_pk %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-success btn-sm"><i class="bi bi-check-lg"></i> Accepter</button>
+                                    </form>
+                                    <form method="post" action="{% url 'reject_friend_request' friendship_pk %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-lg"></i> Refuser</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <form method="post" action="{% url 'send_friend_request' profile_user.id %}">
+                                {% csrf_token %}
+                                <button class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Ajouter en ami</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>
