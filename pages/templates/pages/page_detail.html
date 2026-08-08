@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page.name }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="d-flex align-items-center gap-3">
+            {% if page.image %}
+                <img src="{{ page.image.url }}" alt="{{ page.name }}" class="rounded" width="80" height="80" style="object-fit:cover;">
+            {% else %}
+                <i class="bi bi-file-earmark-post text-primary" style="font-size:4rem;"></i>
+            {% endif %}
+            <div class="flex-grow-1">
+                <h3 class="mb-0">{{ page.name }}</h3>
+                {% if page.description %}
+                    <p class="text-muted mb-1">{{ page.description }}</p>
+                {% endif %}
+                <small class="text-muted">
+                    <i class="bi bi-person-heart"></i> {{ page.follower_count }} abonné{{ page.follower_count|pluralize }}
+                    · gérée par {{ page.owner.username }}
+                </small>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                {% if is_follower %}
+                    <form method="post" action="{% url 'page_unfollow' page.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-person-dash"></i> Ne plus suivre</button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'page_follow' page.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Suivre</button>
+                    </form>
+                {% endif %}
+                {% if page.owner == user %}
+                    <a href="{% url 'page_update' page.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i> Modifier</a>
+                    <a href="{% url 'page_delete' page.pk %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Supprimer</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        {% if page.owner == user %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <form method="post" action="{% url 'page_post_create' page.pk %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <textarea name="content" class="form-control" rows="2" placeholder="Publier sur « {{ page.name }} »…"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <input type="file" name="image" class="form-control" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i> Publier</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        {% for p in page.posts.all %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    {% if p.author.profile.avatar %}
+                        <img src="{{ p.author.profile.avatar.url }}" class="rounded-circle" width="36" height="36" style="object-fit:cover;" alt="Avatar">
+                    {% else %}
+                        <i class="bi bi-person-circle text-muted" style="font-size:2rem;"></i>
+                    {% endif %}
+                    <div>
+                        <a href="{% url 'profile' p.author.username %}" class="fw-bold text-decoration-none text-dark small">
+                            {{ p.author.get_full_name|default:p.author.username }}
+                        </a>
+                        <div class="text-muted small">{{ p.created_at|timesince }}</div>
+                    </div>
+                </div>
+                {% if p.content %}
+                    <p class="mb-2">{{ p.content|linebreaksbr }}</p>
+                {% endif %}
+                {% if p.image %}
+                    <img src="{{ p.image.url }}" class="img-fluid rounded" alt="Image">
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="card shadow-sm">
+            <div class="card-body text-center text-muted">
+                Aucune publication sur cette page pour l'instant.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><i class="bi bi-person-heart"></i> Abonnés ({{ page.follower_count }})</div>
+            <ul class="list-group list-group-flush">
+                {% for f in page.followers.all %}
+                <li class="list-group-item d-flex align-items-center gap-2">
+                    {% if f.profile.avatar %}
+                        <img src="{{ f.profile.avatar.url }}" class="rounded-circle" width="28" height="28" style="object-fit:cover;" alt="Avatar">
+                    {% else %}
+                        <i class="bi bi-person-circle text-muted" style="font-size:1.5rem;"></i>
+                    {% endif %}
+                    <a href="{% url 'profile' f.username %}" class="text-decoration-none small">{{ f.get_full_name|default:f.username }}</a>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted small">Aucun abonné.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
