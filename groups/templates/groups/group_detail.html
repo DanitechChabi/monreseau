@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="d-flex align-items-center gap-3">
+            {% if group.image %}
+                <img src="{{ group.image.url }}" alt="{{ group.name }}" class="rounded" width="80" height="80" style="object-fit:cover;">
+            {% else %}
+                <i class="bi bi-people-fill text-primary" style="font-size:4rem;"></i>
+            {% endif %}
+            <div class="flex-grow-1">
+                <h3 class="mb-0">{{ group.name }}</h3>
+                {% if group.description %}
+                    <p class="text-muted mb-1">{{ group.description }}</p>
+                {% endif %}
+                <small class="text-muted">
+                    <i class="bi bi-person-fill"></i> {{ group.member_count }} membre{{ group.member_count|pluralize }}
+                    · créé par {{ group.creator.username|default:'inconnu' }}
+                </small>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                {% if is_member %}
+                    <form method="post" action="{% url 'group_leave' group.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-left"></i> Quitter</button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'group_join' group.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Rejoindre</button>
+                    </form>
+                {% endif %}
+                {% if group.creator == user %}
+                    <a href="{% url 'group_update' group.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i> Modifier</a>
+                    <a href="{% url 'group_delete' group.pk %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Supprimer</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        {% if is_member %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <form method="post" action="{% url 'group_post_create' group.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <textarea name="content" class="form-control" rows="2" placeholder="Publier dans « {{ group.name }} »…"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i> Publier</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        {% for p in group.posts.all %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    {% if p.author.profile.avatar %}
+                        <img src="{{ p.author.profile.avatar.url }}" class="rounded-circle" width="36" height="36" style="object-fit:cover;" alt="Avatar">
+                    {% else %}
+                        <i class="bi bi-person-circle text-muted" style="font-size:2rem;"></i>
+                    {% endif %}
+                    <div>
+                        <a href="{% url 'profile' p.author.username %}" class="fw-bold text-decoration-none text-dark small">
+                            {{ p.author.get_full_name|default:p.author.username }}
+                        </a>
+                        <div class="text-muted small">{{ p.created_at|timesince }}</div>
+                    </div>
+                </div>
+                <p class="mb-0">{{ p.content|linebreaksbr }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card shadow-sm">
+            <div class="card-body text-center text-muted">
+                {% if is_member %}Aucune publication dans ce groupe pour l'instant.{% else %}Rejoins le groupe pour publier et voir les publications.{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><i class="bi bi-people"></i> Membres ({{ group.member_count }})</div>
+            <ul class="list-group list-group-flush">
+                {% for m in group.members.all %}
+                <li class="list-group-item d-flex align-items-center gap-2">
+                    {% if m.profile.avatar %}
+                        <img src="{{ m.profile.avatar.url }}" class="rounded-circle" width="28" height="28" style="object-fit:cover;" alt="Avatar">
+                    {% else %}
+                        <i class="bi bi-person-circle text-muted" style="font-size:1.5rem;"></i>
+                    {% endif %}
+                    <a href="{% url 'profile' m.username %}" class="text-decoration-none small">{{ m.get_full_name|default:m.username }}</a>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted small">Aucun membre.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

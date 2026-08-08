@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Modifier le groupe{% else %}Créer un groupe{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-4">
+                    {% if object %}Modifier « {{ object.name }} »{% else %}Créer un groupe{% endif %}
+                </h3>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% include '_form_fields.html' %}
+                    <button type="submit" class="btn btn-primary w-100 mt-2">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
