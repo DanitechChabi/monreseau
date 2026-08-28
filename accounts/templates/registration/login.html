@@ -7,29 +7,29 @@
 <div class="container">
     <div class="row align-items-center g-5" style="max-width:980px;margin:0 auto;">
         <div class="col-md-6 d-none d-md-block">
-            <div class="fb-auth-badge">{% include ‘_brand_logo.html’ %}</div>
+            <div class="fb-auth-badge">{% include '_brand_logo.html' %}</div>
             <div class="fb-wordmark">Mon<span class="fw-accent">Réseau</span></div>
             <p class="text-muted" style="font-size:1.2rem;line-height:1.5;margin-top:14px;max-width:360px;">
-                {% trans ‘Le réseau social du Bénin — Fon, Yoruba, Adja et bien d’autres langues.’ %}
+                {% trans "Le réseau social du Bénin — Fon, Yoruba, Adja et bien d'autres langues." %}
             </p>
             <ul class="list-unstyled mt-4" style="color:var(--text-secondary);font-size:0.95rem;">
                 <li class="mb-3 d-flex align-items-start gap-2">
                     <span style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--vert-sombre),var(--vert-sombre-light));display:inline-flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;">
                         <i class="bi bi-chat-left-text"></i>
                     </span>
-                    <span class="pt-1">{% trans ‘Parle ta langue’ %}</span>
+                    <span class="pt-1">{% trans 'Parle ta langue' %}</span>
                 </li>
                 <li class="mb-3 d-flex align-items-start gap-2">
                     <span style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--or-dark),var(--or));display:inline-flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;">
                         <i class="bi bi-mic"></i>
                     </span>
-                    <span class="pt-1">{% trans ‘Partage des notes vocales’ %}</span>
+                    <span class="pt-1">{% trans 'Partage des notes vocales' %}</span>
                 </li>
                 <li class="mb-3 d-flex align-items-start gap-2">
                     <span style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--bleu-nuit-dark),var(--bleu-nuit));display:inline-flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;">
                         <i class="bi bi-people"></i>
                     </span>
-                    <span class="pt-1">{% trans ‘Retrouve ta communauté’ %}</span>
+                    <span class="pt-1">{% trans 'Retrouve ta communauté' %}</span>
                 </li>
             </ul>
         </div>
@@ -37,15 +37,15 @@
             <div class="fb-card p-4" style="max-width:432px;margin:0 auto;">
                 <form method="post" class="mb-3">
                     {% csrf_token %}
-                    {% include ‘_form_fields.html’ %}
-                    <button type="submit" class="btn btn-fb-primary w-100 btn-lg mt-2">{% trans ‘Se connecter’ %}</button>
+                    {% include '_form_fields.html' %}
+                    <button type="submit" class="btn btn-fb-primary w-100 btn-lg mt-2">{% trans 'Se connecter' %}</button>
                     {% if form.non_field_errors %}
                         <div class="text-danger small mt-2">{{ form.non_field_errors }}</div>
                     {% endif %}
                 </form>
                 <hr style="border-color:var(--border);opacity:0.6;">
                 <div class="text-center">
-                    <a href="{% url ‘register’ %}" class="btn btn-fb-green btn-lg w-100">{% trans ‘Créer un nouveau compte’ %}</a>
+                    <a href="{% url 'register' %}" class="btn btn-fb-green btn-lg w-100">{% trans 'Créer un nouveau compte' %}</a>
                 </div>
             </div>
         </div>
