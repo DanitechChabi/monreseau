@@ -1,0 +1,44 @@
+{% load i18n %}
+<div class="fb-about-section mb-3" style="padding:12px 16px;">
+    <h6 class="fb-section-title" style="padding:4px 0 8px;">{% trans 'Contacts' %}</h6>
+    {% for contact in contacts %}
+        <a class="fb-contact" href="{% url 'profile' contact.username %}">
+            <span class="fb-online-wrap">
+                {% if contact.profile.avatar %}
+                    <img class="rounded-circle" src="{{ contact.profile.avatar.url }}" width="36" height="36" style="object-fit:cover;border:2px solid var(--gold-light);" alt="{% trans 'Avatar' %}">
+                {% else %}
+                    <i class="bi bi-person-circle" style="font-size:2.25rem;color:#C4AF98;"></i>
+                {% endif %}
+            </span>
+            <span class="text-truncate">{{ contact.get_full_name|default:contact.username }}</span>
+        </a>
+    {% empty %}
+        <p class="small px-1" style="color:var(--text-muted);">{% trans 'Ajoute des amis pour les retrouver ici.' %}</p>
+    {% endfor %}
+</div>
+
+{% if suggestions %}
+<div class="fb-about-section" style="padding:12px 16px;">
+    <h6 class="fb-section-title" style="padding:4px 0 8px;">{% trans 'Suggestions pour vous' %}</h6>
+    {% for s in suggestions %}
+        <div class="d-flex align-items-center gap-2 px-2 py-2 rounded-3">
+            <a href="{% url 'profile' s.username %}" class="text-decoration-none">
+                {% if s.profile.avatar %}
+                    <img class="rounded-circle" src="{{ s.profile.avatar.url }}" width="36" height="36" style="object-fit:cover;border:2px solid var(--gold-light);" alt="{% trans 'Avatar' %}">
+                {% else %}
+                    <i class="bi bi-person-circle" style="font-size:2.25rem;color:#C4AF98;"></i>
+                {% endif %}
+            </a>
+            <div class="flex-grow-1 text-truncate">
+                <a href="{% url 'profile' s.username %}" class="text-decoration-none fw-semibold small d-block text-truncate" style="color:var(--text);">
+                    {{ s.get_full_name|default:s.username }}
+                </a>
+                <form method="post" action="{% url 'send_friend_request' s.id %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-fb-green mt-1 py-0 px-2" style="font-size:0.78rem;border-radius:14px;">{% trans 'Ajouter' %}</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}

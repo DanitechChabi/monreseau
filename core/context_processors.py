@@ -30,3 +30,14 @@ def unread_counts(request):
         if Message is not None:
             counts['messages'] = Message.unread_count_for(request.user)
     return {'unread_counts': counts}
+
+
+def sidebar_data(request):
+    """Colonne droite façon Facebook : contacts + suggestions d'amis."""
+    if not request.user.is_authenticated:
+        return {'contacts': [], 'suggestions': []}
+    from friends.services import friend_users, suggest_friends
+    return {
+        'contacts': friend_users(request.user, limit=15),
+        'suggestions': suggest_friends(request.user, limit=5),
+    }

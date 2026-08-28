@@ -1,24 +1,49 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Modifier le profil{% endblock %}
+{% block title %}{% trans 'Modifier le profil' %}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-7">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title mb-4">Modifier le profil</h3>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <h6 class="text-primary">Compte</h6>
-                    {% include '_form_fields.html' with form=form %}
-                    <hr>
-                    <h6 class="text-primary">Profil public</h6>
-                    {% include '_form_fields.html' with form=profile_form %}
-                    <button type="submit" class="btn btn-primary w-100 mt-2">Enregistrer</button>
-                </form>
+<div class="fb-card p-4" style="max-width:680px;margin:0 auto;">
+    <h3 class="mb-4">{% trans 'Modifier le profil' %}</h3>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h6 class="text-primary fw-bold"><i class="bi bi-person me-1"></i>{% trans 'Compte' %}</h6>
+        {% include '_form_fields.html' with form=form %}
+        <hr>
+        <h6 class="text-primary fw-bold"><i class="bi bi-person-vcard me-1"></i>{% trans 'Profil public' %}</h6>
+        {% include '_form_fields.html' with form=profile_form exclude='languages ui_language' %}
+        <hr>
+        <h6 class="text-primary fw-bold"><i class="bi bi-translate me-1"></i>{% trans 'Langues' %}</h6>
+        <p class="text-muted small">{% trans 'Choisis les langues béninoises que tu parles, et la langue de l’interface.' %}</p>
+        <div class="mb-3">
+            <label class="form-label">{{ profile_form.languages.label }}</label>
+            <div>
+                {% for checkbox in profile_form.languages %}
+                    <div class="form-check">
+                        {{ checkbox.tag }}
+                        <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                    </div>
+                {% endfor %}
             </div>
+            {% if profile_form.languages.help_text %}
+                <div class="form-text">{{ profile_form.languages.help_text }}</div>
+            {% endif %}
+            {% for error in profile_form.languages.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
         </div>
-    </div>
+        <div class="mb-3">
+            <label for="{{ profile_form.ui_language.id_for_label }}" class="form-label">{{ profile_form.ui_language.label }}</label>
+            {{ profile_form.ui_language }}
+            {% if profile_form.ui_language.help_text %}
+                <div class="form-text">{{ profile_form.ui_language.help_text }}</div>
+            {% endif %}
+            {% for error in profile_form.ui_language.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-fb-primary w-100 mt-2">{% trans 'Enregistrer' %}</button>
+    </form>
 </div>
 {% endblock %}

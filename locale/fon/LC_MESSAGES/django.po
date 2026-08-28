@@ -1,0 +1,418 @@
+# MonRéseau — Fɔ̀ngbè
+# Traduction best-effort des chaînes principales. Les chaînes non traduites
+# (msgstr vide) retombent automatiquement sur le français (msgid).
+# À affiner par des locuteurs natifs fon.
+msgid ""
+msgstr ""
+"Project-Id-Version: MonRéseau\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-09\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fon\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Accueil"
+msgstr "Xwégbé"
+
+msgid "Amis"
+msgstr "Xótó"
+
+msgid "Groupes"
+msgstr "Dukɔtɔtɔ"
+
+msgid "Pages"
+msgstr "Avɔ"
+
+msgid "Connexion"
+msgstr "Gé mɛ jìdo"
+
+msgid "Se connecter"
+msgstr "Gé mɛ jìdo"
+
+msgid "S’inscrire"
+msgstr "Kɔ tɔ yì jìdo"
+
+msgid "Inscription"
+msgstr "Kɔ tɔ yì jìdo"
+
+msgid "Créer un compte"
+msgstr "Kpó tɔ jìdo"
+
+msgid "Créer un nouveau compte"
+msgstr "Kpó tɔ jìdo hwa"
+
+msgid "Créer un groupe"
+msgstr "Kpó tɔ dukɔtɔtɔ"
+
+msgid "Créer une page"
+msgstr "Kpó tɔ avɔ"
+
+msgid "Créer une publication"
+msgstr "Tɔn"
+
+msgid "Modifier"
+msgstr "Yì wé"
+
+msgid "Modifier le profil"
+msgstr "Yì wé nà"
+
+msgid "Supprimer"
+msgstr "Tɔn"
+
+msgid "Rechercher"
+msgstr "Tɔka"
+
+msgid "Recherche"
+msgstr "Tɔka"
+
+msgid "Rechercher des personnes…"
+msgstr "Tɔka amɛ…"
+
+msgid "Message"
+msgstr "Sìkàtì"
+
+msgid "Messagerie"
+msgstr "Sìkàtì"
+
+msgid "Envoyer"
+msgstr "Fá"
+
+msgid "Photo"
+msgstr "Hãmà"
+
+msgid "Accepter"
+msgstr "Ná"
+
+msgid "Refuser"
+msgstr "Kò"
+
+msgid "Ajouter"
+msgstr "Ká"
+
+msgid "Ajouter en ami"
+msgstr "Ká xótó"
+
+msgid "Retirer"
+msgstr "Tɔn"
+
+msgid "Rejoindre"
+msgstr "Ké"
+
+msgid "Quitter"
+msgstr "Jì"
+
+msgid "Suivre"
+msgstr "Ké"
+
+msgid "Ne plus suivre"
+msgstr "Dò ké dùn"
+
+msgid "Partager"
+msgstr "Tɔn hwa"
+
+msgid "Commenter"
+msgstr "Hwlɛn nu"
+
+msgid "Publier"
+msgstr "Tɔn"
+
+msgid "Publications"
+msgstr "Mì jìn"
+
+msgid "J’aime"
+msgstr "Un na jò"
+
+msgid "Précédent"
+msgstr "Jì tókpló"
+
+msgid "Suivant"
+msgstr "Jì gàn"
+
+msgid "Enregistrer"
+msgstr "Dà"
+
+msgid "Annuler"
+msgstr "Fì"
+
+msgid "Demande envoyée"
+msgstr "Un ká sí hwan"
+
+msgid "Demandes"
+msgstr "À mì kà"
+
+msgid "Déconnexion"
+msgstr "Jì"
+
+msgid "Mon Réseau"
+msgstr "Mɛ Xótɔ̃gblɔn"
+
+msgid "Mon profil"
+msgstr "Nà"
+
+msgid "Notifications"
+msgstr "Xwégbé dɔn"
+
+msgid "Contacts"
+msgstr "Xótó kpakpà"
+
+msgid "Suggestions"
+msgstr "Mì hwlé"
+
+msgid "Suggestions pour vous"
+msgstr "Mì hwlé tò"
+
+msgid "Messages"
+msgstr "Sìkàtì"
+
+# --- Chaînes des vues Python ---
+
+msgid "Bienvenue %(username)s ! Ton compte a été créé."
+msgstr ""
+
+msgid "Ton profil a bien été mis à jour."
+msgstr "Un yì wé nà dáadáa."
+
+msgid "Impossible de t'ajouter toi-même en ami."
+msgstr ""
+
+msgid "Une demande est déjà en cours ou vous êtes déjà amis."
+msgstr ""
+
+msgid "Demande d'ami envoyée à %(name)s."
+msgstr ""
+
+msgid "Vous êtes maintenant amis avec %(name)s."
+msgstr ""
+
+msgid "Demande d'ami de %(name)s refusée."
+msgstr ""
+
+msgid "Demande d'ami annulée pour %(name)s."
+msgstr ""
+
+msgid "Vous n'êtes plus ami avec %(name)s."
+msgstr ""
+
+msgid "Groupe « %(name)s » créé !"
+msgstr ""
+
+msgid "Tu as rejoint le groupe « %(name)s »."
+msgstr ""
+
+msgid "Tu as quitté le groupe « %(name)s »."
+msgstr ""
+
+msgid "Rejoins le groupe avant de pouvoir y publier."
+msgstr ""
+
+msgid "Publication ajoutée au groupe."
+msgstr "Mì jìn tò wé hwan."
+
+msgid "Ta publication est vide."
+msgstr ""
+
+msgid "Page « %(name)s » créée !"
+msgstr ""
+
+msgid "Tu suis maintenant la page « %(name)s »."
+msgstr ""
+
+msgid "Tu ne suis plus la page « %(name)s »."
+msgstr ""
+
+msgid "Seul le propriétaire peut publier sur sa page."
+msgstr ""
+
+msgid "Publication ajoutée à la page."
+msgstr ""
+
+msgid "Publication partagée !"
+msgstr "Mì jìn tò!"
+
+msgid "Commentaire ajouté."
+msgstr ""
+
+msgid "Ton commentaire est vide ou invalide."
+msgstr ""
+
+msgid "Tu ne peux pas supprimer ce commentaire."
+msgstr ""
+
+msgid "Commentaire supprimé."
+msgstr ""
+
+msgid "Impossible de te parler à toi-même."
+msgstr ""
+
+msgid "Tu ne peux envoyer un message qu'à tes amis."
+msgstr ""
+
+# --- Chaînes avec variables ---
+
+msgid "Quoi de neuf, {{ display_name }} ?"
+msgstr ""
+
+msgid "Page {{ n }} / {{ total }}"
+msgstr "Avɔ {{ n }} / {{ total }}"
+
+msgid "{{ counter }} ami"
+msgstr "xótó {{ counter }}"
+
+msgid "{{ counter }} amis"
+msgstr "xótó {{ counter }}"
+
+msgid "Aucun résultat pour « {{ q }} »."
+msgstr ""
+
+# --- Modèle Language ---
+
+msgid "Code ISO"
+msgstr ""
+
+msgid "Nom"
+msgstr ""
+
+msgid "Nom d’origine"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Interface traduite"
+msgstr ""
+
+msgid "Langue"
+msgstr "Jì"
+
+# --- Chaînes restantes : non traduites (retombent sur le français) ---
+
+msgid "Actions"
+msgstr ""
+
+msgid "Ajoute des amis pour les retrouver ici."
+msgstr ""
+
+msgid "Avatar"
+msgstr ""
+
+msgid "Cette action est irréversible."
+msgstr ""
+
+msgid "Choisis les langues béninoises que tu parles, et la langue de l’interface."
+msgstr ""
+
+msgid "Compte"
+msgstr ""
+
+msgid "Conversation"
+msgstr ""
+
+msgid "Copier le lien"
+msgstr ""
+
+msgid "Crée la première !"
+msgstr ""
+
+msgid "Crée le premier !"
+msgstr ""
+
+msgid "C’est rapide et facile."
+msgstr ""
+
+msgid "Demandes d'amitié"
+msgstr ""
+
+msgid "Découvre des suggestions"
+msgstr ""
+
+msgid "Déjà membre ? Connecte-toi"
+msgstr ""
+
+msgid "Fil d’actualité"
+msgstr ""
+
+msgid "Image de la publication"
+msgstr ""
+
+msgid "Le réseau social du Bénin — Fon, Yoruba, Adja et bien d’autres langues."
+msgstr ""
+
+msgid "Mes amis"
+msgstr ""
+
+msgid "Nouvelle conversation"
+msgstr ""
+
+msgid "Nouvelle publication"
+msgstr ""
+
+msgid "Oui, supprimer"
+msgstr ""
+
+msgid "Photo de couverture"
+msgstr ""
+
+msgid "Profil public"
+msgstr ""
+
+msgid "Publication avec image uniquement."
+msgstr ""
+
+msgid "Rejoins le groupe pour publier et voir les publications."
+msgstr ""
+
+msgid "Rends-toi sur le profil d'un ami et clique sur « Message »."
+msgstr ""
+
+msgid "Suggestions d'amis"
+msgstr ""
+
+msgid "Supprimer cette publication ?"
+msgstr ""
+
+msgid "Supprimer la page"
+msgstr ""
+
+msgid "Supprimer la publication"
+msgstr ""
+
+msgid "Supprimer le commentaire"
+msgstr ""
+
+msgid "Supprimer le groupe"
+msgstr ""
+
+msgid "Tape un nom ou un pseudo pour chercher des personnes."
+msgstr ""
+
+msgid "Ton fil est vide pour l’instant. Ajoute des amis ou publie ton premier post !"
+msgstr ""
+
+msgid "Toutes les publications de la page seront également supprimées."
+msgstr ""
+
+msgid "Toutes les publications du groupe seront également supprimées."
+msgstr ""
+
+msgid "Tu n'as pas encore d'amis."
+msgstr ""
+
+msgid "Voir la page"
+msgstr ""
+
+msgid "Voir le groupe"
+msgstr ""
+
+msgid "Voir le profil"
+msgstr ""
+
+msgid "commentaires"
+msgstr ""
+
+msgid "Code ISO 639-3 (ex. fon, yor)"
+msgstr ""
+
+msgid "Vrai si l'interface du site existe dans cette langue."
+msgstr ""

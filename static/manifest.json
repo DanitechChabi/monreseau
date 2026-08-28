@@ -1,0 +1,22 @@
+{
+    "name": "MonRéseau",
+    "short_name": "MonRéseau",
+    "description": "Réseau social du Bénin — Fon, Yoruba, Adja et plus",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FAF3E6",
+    "theme_color": "#7B2D26",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/static/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

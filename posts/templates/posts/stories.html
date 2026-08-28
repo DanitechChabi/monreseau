@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Stories' %}{% endblock %}
+
+{% block content %}
+<h3 class="mb-4" style="font-weight:700;color:var(--espresso);">
+    <i class="bi bi-play-circle" style="color:var(--terracotta);"></i> {% trans 'Stories' %}
+</h3>
+
+<div class="fb-stories" style="flex-wrap:wrap;gap:12px;">
+    {# Créer une story #}
+    <div class="fb-story" style="cursor:pointer;" onclick="document.getElementById('storyModal').style.display='flex';">
+        <div class="h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,var(--gold),var(--terracotta));">
+            <i class="bi bi-plus-circle-fill" style="font-size:2.5rem;color:#fff;"></i>
+        </div>
+        <div class="fb-story-name">{% trans 'Créer une story' %}</div>
+    </div>
+
+    {% for story in stories %}
+    <div class="fb-story" onclick="viewStory({{ story.pk }})">
+        {% if story.story_type == 'image' and story.image %}
+            <img class="fb-story-img" src="{{ story.image.url }}" alt="{% trans 'Story' %}">
+        {% elif story.story_type == 'video' and story.video %}
+            <video class="fb-story-img" muted preload="metadata" style="object-fit:cover;">
+                <source src="{{ story.video.url }}" type="video/mp4">
+            </video>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;">
+                <i class="bi bi-play-fill" style="font-size:2rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.5);"></i>
+            </div>
+        {% elif story.story_type == 'text' %}
+            <div class="h-100 d-flex align-items-center justify-content-center p-3" style="background:{{ story.bg_color }};">
+                <p class="text-white fw-bold text-center" style="font-size:1.1rem;">{{ story.content|linebreaksbr }}</p>
+            </div>
+        {% elif story.story_type == 'audio' and story.audio %}
+            <div class="h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,var(--espresso),var(--brown));">
+                <i class="bi bi-mic-fill" style="font-size:3rem;color:var(--gold);"></i>
+            </div>
+        {% endif %}
+        <div class="fb-story-name">
+            {{ story.author.get_full_name|default:story.author.username }}
+            <span style="font-size:0.7rem;opacity:0.8;">{{ story.time_remaining }}</span>
+        </div>
+    </div>
+    {% empty %}
+    <div class="fb-empty" style="width:100%;">
+        <i class="bi bi-play-circle" style="font-size:3rem;color:#C4AF98;"></i>
+        <p class="mt-3 mb-0">{% trans 'Aucune story pour le moment.' %}</p>
+    </div>
+    {% endfor %}
+</div>
+
+{# Modal de création de story avec aperçu #}
+<div id="storyModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1060;align-items:center;justify-content:center;padding:16px;">
+    <div class="fb-card p-4" style="width:100%;max-width:400px;max-height:90vh;overflow-y:auto;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0" style="font-weight:700;">{% trans 'Nouvelle story' %}</h5>
+            <button type="button" class="btn-close" onclick="document.getElementById('storyModal').style.display='none';"></button>
+        </div>
+
+        {# Aperçu en direct #}
+        <div id="storyPreview" style="display:none;border-radius:16px;overflow:hidden;margin-bottom:16px;position:relative;aspect-ratio:9/16;max-height:300px;">
+            <div id="previewText" style="display:none;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:20px;">
+                <p id="previewTextContent" class="text-white fw-bold text-center mb-0" style="font-size:1.1rem;"></p>
+            </div>
+            <img id="previewImage" style="display:none;width:100%;height:100%;object-fit:cover;" alt="Aperçu">
+            <video id="previewVideo" style="display:none;width:100%;height:100%;object-fit:cover;" muted loop autoplay></video>
+            <audio id="previewAudio" controls style="position:absolute;bottom:20px;left:20px;right:20px;border-radius:12px;"></audio>
+            <div id="previewType" style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.5);color:#fff;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;"></div>
+        </div>
+
+        <form method="post" action="{% url 'story_create' %}" enctype="multipart/form-data" id="storyForm">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">{% trans 'Type' %}</label>
+                <select name="story_type" class="form-control" id="storyType" onchange="updatePreview()">
+                    <option value="text">{% trans 'Texte' %}</option>
+                    <option value="image">{% trans 'Image' %}</option>
+                    <option value="video">{% trans 'Vidéo' %}</option>
+                    <option value="audio">{% trans 'Audio' %}</option>
+                </select>
+            </div>
+            <div class="mb-3" id="textGroup">
+                <label class="form-label">{% trans 'Texte' %}</label>
+                <textarea name="content" rows="3" class="form-control" id="storyContent" placeholder="{% trans 'Quoi de neuf ?' %}" oninput="updatePreview()"></textarea>
+            </div>
+            <div class="mb-3" id="imageGroup" style="display:none;">
+                <label class="form-label">{% trans 'Image' %}</label>
+                <input type="file" name="image" accept="image/*" class="form-control" id="storyImage" onchange="updatePreview()">
+            </div>
+            <div class="mb-3" id="videoGroup" style="display:none;">
+                <label class="form-label">{% trans 'Vidéo' %}</label>
+                <input type="file" name="video" accept="video/*" class="form-control" id="storyVideo" onchange="updatePreview()">
+            </div>
+            <div class="mb-3" id="audioGroup" style="display:none;">
+                <label class="form-label">{% trans 'Audio' %}</label>
+                <input type="file" name="audio" accept="audio/*" class="form-control" id="storyAudio" onchange="updatePreview()">
+            </div>
+            <div class="mb-3" id="bgGroup">
+                <label class="form-label">{% trans 'Couleur de fond' %}</label>
+                <input type="color" name="bg_color" value="#D4A017" class="form-control form-control-color" id="storyBgColor" onchange="updatePreview()">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-fb-secondary flex-grow-1" onclick="document.getElementById('storyModal').style.display='none';resetPreview();">{% trans 'Annuler' %}</button>
+                <button type="submit" class="btn btn-fb-primary flex-grow-1">{% trans 'Publier' %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Aperçu en direct
+function updatePreview() {
+    var type = document.getElementById('storyType').value;
+    var preview = document.getElementById('storyPreview');
+    var previewType = document.getElementById('previewType');
+
+    // Masquer tous les groups
+    document.getElementById('textGroup').style.display = 'none';
+    document.getElementById('imageGroup').style.display = 'none';
+    document.getElementById('videoGroup').style.display = 'none';
+    document.getElementById('audioGroup').style.display = 'none';
+    document.getElementById('bgGroup').style.display = 'none';
+
+    // Masquer tous les aperçus
+    document.getElementById('previewText').style.display = 'none';
+    document.getElementById('previewImage').style.display = 'none';
+    document.getElementById('previewVideo').style.display = 'none';
+    document.getElementById('previewAudio').style.display = 'none';
+
+    if (type === 'text') {
+        document.getElementById('textGroup').style.display = 'block';
+        document.getElementById('bgGroup').style.display = 'block';
+        preview.style.display = 'block';
+        preview.style.background = document.getElementById('storyBgColor').value;
+        document.getElementById('previewText').style.display = 'flex';
+        document.getElementById('previewTextContent').textContent = document.getElementById('storyContent').value || '{% trans "Tape ton texte..." %}';
+        previewType.textContent = '📝 {% trans "Texte" %}';
+    } else if (type === 'image') {
+        document.getElementById('imageGroup').style.display = 'block';
+        var file = document.getElementById('storyImage').files[0];
+        if (file) {
+            preview.style.display = 'block';
+            var img = document.getElementById('previewImage');
+            img.src = URL.createObjectURL(file);
+            img.style.display = 'block';
+            preview.style.background = '#000';
+            previewType.textContent = '🖼️ {% trans "Image" %}';
+        } else {
+            preview.style.display = 'none';
+        }
+    } else if (type === 'video') {
+        document.getElementById('videoGroup').style.display = 'block';
+        var file = document.getElementById('storyVideo').files[0];
+        if (file) {
+            preview.style.display = 'block';
+            var vid = document.getElementById('previewVideo');
+            vid.src = URL.createObjectURL(file);
+            vid.style.display = 'block';
+            preview.style.background = '#000';
+            previewType.textContent = '🎬 {% trans "Vidéo" %}';
+        } else {
+            preview.style.display = 'none';
+        }
+    } else if (type === 'audio') {
+        document.getElementById('audioGroup').style.display = 'block';
+        document.getElementById('bgGroup').style.display = 'block';
+        var file = document.getElementById('storyAudio').files[0];
+        if (file) {
+            preview.style.display = 'block';
+            preview.style.background = document.getElementById('storyBgColor').value;
+            var aud = document.getElementById('previewAudio');
+            aud.src = URL.createObjectURL(file);
+            aud.style.display = 'block';
+            previewType.textContent = '🎵 {% trans "Audio" %}';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+}
+
+function resetPreview() {
+    document.getElementById('storyPreview').style.display = 'none';
+    document.getElementById('previewImage').style.display = 'none';
+    document.getElementById('previewVideo').style.display = 'none';
+    document.getElementById('previewAudio').style.display = 'none';
+    document.getElementById('previewText').style.display = 'none';
+    document.getElementById('storyForm').reset();
+}
+
+// Initialiser l'aperçu au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    updatePreview();
+});
+
+// Voir la story
+function viewStory(id) {
+    fetch('/posts/stories/' + id + '/view/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+    });
+}
+</script>
+{% endblock %}

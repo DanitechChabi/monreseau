@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
@@ -52,7 +53,7 @@ class GroupCreateView(LoginRequiredMixin, CreateView):
         form.instance.creator = self.request.user
         response = super().form_valid(form)
         self.object.members.add(self.request.user)
-        messages.success(self.request, f'Groupe « {self.object.name} » créé !')
+        messages.success(self.request, _('Groupe « %(name)s » créé !') % {'name': self.object.name})
         return response
 
     def get_success_url(self):
@@ -86,7 +87,7 @@ class JoinGroupView(LoginRequiredMixin, View):
     def post(self, request, pk):
         group = get_object_or_404(Group, pk=pk)
         group.members.add(request.user)
-        messages.success(request, f"Tu as rejoint le groupe « {group.name} ».")
+        messages.success(request, _("Tu as rejoint le groupe « %(name)s ».") % {'name': group.name})
         return redirect(group.get_absolute_url())
 
 
@@ -96,7 +97,7 @@ class LeaveGroupView(LoginRequiredMixin, View):
     def post(self, request, pk):
         group = get_object_or_404(Group, pk=pk)
         group.members.remove(request.user)
-        messages.info(request, f"Tu as quitté le groupe « {group.name} ».")
+        messages.info(request, _("Tu as quitté le groupe « %(name)s ».") % {'name': group.name})
         return redirect(group.get_absolute_url())
 
 
@@ -106,12 +107,12 @@ class GroupPostCreateView(LoginRequiredMixin, View):
     def post(self, request, pk):
         group = get_object_or_404(Group, pk=pk)
         if not group.members.filter(pk=request.user.pk).exists():
-            messages.error(request, 'Rejoins le groupe avant de pouvoir y publier.')
+            messages.error(request, _('Rejoins le groupe avant de pouvoir y publier.'))
             return redirect(group.get_absolute_url())
         content = request.POST.get('content', '').strip()
         if content:
             GroupPost.objects.create(group=group, author=request.user, content=content)
-            messages.success(request, 'Publication ajoutée au groupe.')
+            messages.success(request, _('Publication ajoutée au groupe.'))
         else:
-            messages.error(request, 'Ta publication est vide.')
+            messages.error(request, _('Ta publication est vide.'))
         return redirect(group.get_absolute_url())

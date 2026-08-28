@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import DetailView, ListView
 
@@ -60,8 +61,12 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
 
     def post(self, request, pk):
         conversation = self.get_object()
-        form = MessageForm(request.POST)
+        form = MessageForm(request.POST, request.FILES)
         if form.is_valid():
+            body = form.cleaned_data.get('body', '').strip()
+            audio = form.cleaned_data.get('audio')
+            if not body and not audio:
+                return redirect(conversation.get_absolute_url())
             message = form.save(commit=False)
             message.conversation = conversation
             message.sender = request.user
@@ -84,10 +89,10 @@ class StartConversationView(LoginRequiredMixin, View):
     def post(self, request, user_id):
         target = get_object_or_404(User, pk=user_id)
         if target == request.user:
-            messages.error(request, "Impossible de te parler à toi-même.")
+            messages.error(request, _("Impossible de te parler à toi-même."))
             return redirect('home')
         if not Friendship.are_friends(request.user, target):
-            messages.error(request, 'Tu ne peux envoyer un message qu\'à tes amis.')
+            messages.error(request, _("Tu ne peux envoyer un message qu'à tes amis."))
             return redirect('profile', username=target.username)
         conversation = get_or_create_conversation(request.user, target)
         return redirect(conversation.get_absolute_url())

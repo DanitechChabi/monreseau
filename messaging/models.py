@@ -37,7 +37,12 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name='sent_messages',
     )
-    body = models.TextField(verbose_name='Message')
+    body = models.TextField(blank=True, verbose_name='Message')
+    audio = models.FileField(
+        upload_to='messages/audio/%Y/%m/',
+        blank=True,
+        verbose_name='Message audio',
+    )
     is_read = models.BooleanField(default=False, verbose_name='Lu')
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -1,129 +1,248 @@
-{% load static %}
+{% load i18n static %}
 <!doctype html>
 <html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Mon Réseau{% endblock %}</title>
+    <title>{% block title %}{% trans 'Mon Réseau' %}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{% static 'css/monreseau.css' %}" rel="stylesheet">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#7B2D26">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Réseau social du Bénin — Fon, Yoruba, Adja et plus">
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-body-tertiary">
+<body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'home' %}">
-            <i class="bi bi-globe2"></i> MonRéseau
+{% if request.user.is_authenticated %}
+{# ====================== Top bar façon Facebook ====================== #}
+<header class="fb-topbar">
+    <a class="fb-logo" href="{% url 'home' %}" title="{% trans 'Mon Réseau' %}">
+        {% include '_brand_logo.html' %}
+    </a>
+
+    <form class="fb-search-wrap" action="{% url 'search' %}" method="get">
+        <i class="bi bi-search fb-search-icon"></i>
+        <input class="fb-search" type="search" name="q"
+               placeholder="{% trans 'Rechercher des personnes…' %}" aria-label="{% trans 'Rechercher' %}">
+    </form>
+
+    <nav class="fb-nav">
+        <a class="fb-nav-icon {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+           href="{% url 'home' %}" title="{% trans 'Accueil' %}">
+            <i class="bi {% if request.resolver_match.url_name == 'home' %}bi-house-door-fill{% else %}bi-house-door{% endif %}"></i>
         </a>
+        <a class="fb-nav-icon {% if request.resolver_match.url_name in 'friend_list friend_requests friend_suggestions' %}active{% endif %}"
+           href="{% url 'friend_list' %}" title="{% trans 'Amis' %}">
+            <i class="bi {% if request.resolver_match.url_name in 'friend_list friend_requests friend_suggestions' %}bi-people-fill{% else %}bi-people{% endif %}"></i>
+        </a>
+        <a class="fb-nav-icon {% if request.resolver_match.url_name in 'group_list group_detail group_create group_update' %}active{% endif %}"
+           href="{% url 'group_list' %}" title="{% trans 'Groupes' %}">
+            <i class="bi {% if request.resolver_match.url_name in 'group_list group_detail group_create group_update' %}bi-person-plus-fill{% else %}bi-person-plus{% endif %}"></i>
+        </a>
+        <a class="fb-nav-icon {% if request.resolver_match.url_name in 'page_list page_detail page_create page_update' %}active{% endif %}"
+           href="{% url 'page_list' %}" title="{% trans 'Pages' %}">
+            <i class="bi {% if request.resolver_match.url_name in 'page_list page_detail page_create page_update' %}bi-file-earmark-post-fill{% else %}bi-file-earmark-post{% endif %}"></i>
+        </a>
+    </nav>
 
-        {% if request.user.is_authenticated %}
-        <form class="d-flex ms-3 me-3 flex-grow-1 d-none d-lg-flex" action="{% url 'search' %}" method="get">
-            <input class="form-control" type="search" name="q" placeholder="Rechercher des personnes…" aria-label="Rechercher">
-        </form>
-        {% endif %}
-
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-            <span class="navbar-toggler-icon"></span>
+    <div class="d-flex align-items-center gap-2">
+        <a class="fb-icon-btn" href="{% url 'conversation_list' %}" title="{% trans 'Messagerie' %}">
+            <i class="bi bi-messenger"></i>
+            <span class="fb-badge" id="msgBadge" {% if unread_counts.messages == 0 %}hidden{% endif %}>{{ unread_counts.messages }}</span>
+        </a>
+        <a class="fb-icon-btn" href="{% url 'notification_list' %}" title="{% trans 'Notifications' %}">
+            <i class="bi bi-bell"></i>
+            <span class="fb-badge" id="notifBadge" {% if unread_counts.notifications == 0 %}hidden{% endif %}>{{ unread_counts.notifications }}</span>
+        </a>
+        <button class="fb-icon-btn" type="button" id="darkModeToggle" title="{% trans 'Mode sombre' %}">
+            <i class="bi bi-moon"></i>
         </button>
 
-        <div class="collapse navbar-collapse" id="mainNav">
-            {% if request.user.is_authenticated %}
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'home' %}"><i class="bi bi-house-door"></i> Accueil</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'friend_list' %}"><i class="bi bi-people"></i> Amis</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'group_list' %}"><i class="bi bi-people-fill"></i> Groupes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'page_list' %}"><i class="bi bi-file-earmark-post"></i> Pages</a>
-                </li>
+        {% comment %} Sélecteur de langue {% endcomment %}
+        {% get_available_languages as LANGUAGES %}
+        <div class="dropdown">
+            <button class="fb-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans 'Langue' %}">
+                <i class="bi bi-globe-americas"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                {% get_current_language as CURRENT_LANGUAGE %}
+                {% for code, name in LANGUAGES %}
+                    <li>
+                        <form method="post" action="{% url 'set_language' %}" class="m-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="language" value="{{ code }}">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit"
+                                    class="dropdown-item {% if code == CURRENT_LANGUAGE %}active{% endif %}">
+                                {% if code == CURRENT_LANGUAGE %}<i class="bi bi-check2 me-1"></i>{% endif %}
+                                {{ name }}
+                            </button>
+                        </form>
+                    </li>
+                {% endfor %}
             </ul>
+        </div>
 
-            <ul class="navbar-nav">
-                <li class="nav-item position-relative">
-                    <a class="nav-link" href="{% url 'conversation_list' %}">
-                        <i class="bi bi-chat-dots"></i>
-                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle"
-                              id="msgBadge" {% if unread_counts.messages == 0 %}hidden{% endif %}>
-                            {{ unread_counts.messages }}
-                        </span>
-                    </a>
-                </li>
-                <li class="nav-item position-relative">
-                    <a class="nav-link" href="{% url 'notification_list' %}">
-                        <i class="bi bi-bell"></i>
-                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle"
-                              id="notifBadge" {% if unread_counts.notifications == 0 %}hidden{% endif %}>
-                            {{ unread_counts.notifications }}
-                        </span>
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+        {% comment %} Profil {% endcomment %}
+        <div class="dropdown">
+            <button class="fb-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius:50%;">
+                {% if request.user.profile.avatar %}
+                    <img class="fb-topbar-avatar" src="{{ request.user.profile.avatar.url }}" alt="{% trans 'Avatar' %}">
+                {% else %}
+                    <i class="bi bi-person-circle"></i>
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li>
+                    <a class="dropdown-item" href="{% url 'profile' request.user.username %}">
                         {% if request.user.profile.avatar %}
-                            <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="rounded-circle" width="28" height="28" style="object-fit: cover;">
+                            <img class="rounded-circle me-2" src="{{ request.user.profile.avatar.url }}" width="32" height="32" style="object-fit:cover;" alt="">
                         {% else %}
-                            <i class="bi bi-person-circle"></i>
+                            <i class="bi bi-person-circle me-2"></i>
                         {% endif %}
-                        {{ request.user.username }}
+                        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong><br>
+                        <span class="text-muted small">@{{ request.user.username }}</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{% url 'profile' request.user.username %}"><i class="bi bi-person"></i> Mon profil</a></li>
-                        <li><a class="dropdown-item" href="{% url 'edit_profile' request.user.username %}"><i class="bi bi-gear"></i> Modifier le profil</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> Déconnexion</button>
-                            </form>
-                        </li>
-                    </ul>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'profile' request.user.username %}"><i class="bi bi-person me-2"></i>{% trans 'Mon profil' %}</a></li>
+                <li><a class="dropdown-item" href="{% url 'edit_profile' request.user.username %}"><i class="bi bi-gear me-2"></i>{% trans 'Modifier le profil' %}</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>{% trans 'Déconnexion' %}</button>
+                    </form>
                 </li>
             </ul>
-            {% else %}
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Connexion</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Inscription</a></li>
-            </ul>
-            {% endif %}
         </div>
     </div>
+</header>
+
+{# ====================== Contenu 3 colonnes ====================== #}
+<main class="fb-main">
+    {# Toast notifications #}
+    <div class="fb-toast-container" id="toastContainer">
+        {% for message in messages %}
+            <div class="fb-toast {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}" role="alert">
+                {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill"></i>
+                {% elif message.tags == 'error' %}<i class="bi bi-exclamation-circle-fill"></i>
+                {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+                <span>{{ message }}</span>
+                <button type="button" class="fb-toast-close" onclick="this.parentElement.remove()" aria-label="Fermer"><i class="bi bi-x"></i></button>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% block layout %}
+    <div class="fb-row">
+        <aside class="fb-col-left d-none d-lg-block">
+            <div class="fb-sidebar">
+                {% include '_sidebar_left.html' %}
+            </div>
+        </aside>
+
+        <div class="fb-col-center">
+            {% block content %}{% endblock %}
+        </div>
+
+        <aside class="fb-col-right d-none d-xl-block">
+            <div class="fb-sidebar">
+                {% include '_sidebar_right.html' %}
+            </div>
+        </aside>
+    </div>
+    {% endblock %}
+</main>
+
+{# ========== BOTTOM NAV BAR (mobile) — connecté uniquement ========== #}
+<nav class="fb-bottombar">
+    <a class="fb-bottom-icon {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+        <i class="bi {% if request.resolver_match.url_name == 'home' %}bi-house-door-fill{% else %}bi-house-door{% endif %}"></i>
+        <span>{% trans 'Accueil' %}</span>
+    </a>
+    <a class="fb-bottom-icon {% if request.resolver_match.url_name in 'friend_list friend_requests friend_suggestions' %}active{% endif %}" href="{% url 'friend_list' %}">
+        <i class="bi {% if request.resolver_match.url_name in 'friend_list friend_requests friend_suggestions' %}bi-people-fill{% else %}bi-people{% endif %}"></i>
+        <span>{% trans 'Amis' %}</span>
+    </a>
+    <a class="fb-bottom-icon" href="{% url 'post_create' %}">
+        <i class="bi bi-plus-square-fill" style="font-size:1.8rem;color:var(--gold);"></i>
+        <span style="color:var(--gold);">{% trans 'Publier' %}</span>
+    </a>
+    <a class="fb-bottom-icon {% if request.resolver_match.url_name == 'notification_list' %}active{% endif %}" href="{% url 'notification_list' %}">
+        <i class="bi {% if request.resolver_match.url_name == 'notification_list' %}bi-bell-fill{% else %}bi-bell{% endif %}"></i>
+        <span>{% trans 'Notif.' %}</span>
+        <span class="fb-badge" id="bottomNotifBadge" {% if unread_counts.notifications == 0 %}hidden{% endif %}>{{ unread_counts.notifications }}</span>
+    </a>
+    <a class="fb-bottom-icon {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' request.user.username %}">
+        {% if request.user.profile.avatar %}
+            <img src="{{ request.user.profile.avatar.url }}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);" alt="{% trans 'Avatar' %}">
+        {% else %}
+            <i class="bi bi-person-circle"></i>
+        {% endif %}
+        <span>{% trans 'Profil' %}</span>
+    </a>
 </nav>
 
-<main class="container mt-3 mb-5">
+{% else %}
+{# ====================== Page publique (connexion / inscription) ====================== #}
+{% get_available_languages as LANGUAGES %}
+<div class="position-fixed top-0 end-0 p-3" style="z-index:1040;">
+    <div class="dropdown">
+        <button class="fb-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans 'Langue' %}">
+            <i class="bi bi-globe-americas"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            {% get_current_language as CURRENT_LANGUAGE %}
+            {% for code, name in LANGUAGES %}
+                <li>
+                    <form method="post" action="{% url 'set_language' %}" class="m-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="language" value="{{ code }}">
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="dropdown-item {% if code == CURRENT_LANGUAGE %}active{% endif %}">
+                            {% if code == CURRENT_LANGUAGE %}<i class="bi bi-check2 me-1"></i>{% endif %}
+                            {{ name }}
+                        </button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<main class="fb-auth-page">
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show w-100 mx-auto" style="max-width:432px;" role="alert">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         {% endfor %}
     {% endif %}
-
-    {% block content %}{% endblock %}
+    {% block guest_content %}{% endblock %}
 </main>
+
+{% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 {% if request.user.is_authenticated %}
 <script>
     // Mise à jour périodique des badges non-lus (notifications + messages).
-    // Polling simple : suffisant pour un MVP, remplaçable par WebSockets plus tard.
     function setBadge(id, n) {
         const el = document.getElementById(id);
-        if (el) {
-            el.textContent = n;
-            el.hidden = n === 0;
-        }
+        if (el) { el.textContent = n; el.hidden = n === 0; }
     }
     function refreshBadges() {
         fetch('/notifications/unread-count/')
             .then(r => r.json())
-            .then(d => setBadge('notifBadge', d.count))
+            .then(d => {
+                setBadge('notifBadge', d.count);
+                setBadge('bottomNotifBadge', d.count);
+            })
             .catch(() => {});
         fetch('/messages/unread-count/')
             .then(r => r.json())
@@ -134,6 +253,135 @@
     refreshBadges();
 </script>
 {% endif %}
+<script src="{% static 'js/audio.js' %}"></script>
+<script>
+// Dark mode toggle
+(function() {
+    var toggle = document.getElementById('darkModeToggle');
+    if (!toggle) return;
+    var isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) document.body.classList.add('dark-mode');
+    toggle.innerHTML = isDark ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon"></i>';
+    toggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        var nowDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', nowDark);
+        this.innerHTML = nowDark ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon"></i>';
+    });
+})();
+
+// Reaction picker: tap sur mobile pour ouvrir/fermer
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.fb-reaction-trigger').forEach(function(trigger) {
+        trigger.addEventListener('click', function(e) {
+            if (window.innerWidth < 768) {
+                // Si le clic est sur un bouton emoji (soumission du formulaire), laisser passer
+                if (e.target.closest('.fb-reaction-picker')) {
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                document.querySelectorAll('.fb-reaction-trigger.show-picker').forEach(function(t) {
+                    if (t !== trigger) t.classList.remove('show-picker');
+                });
+                trigger.classList.toggle('show-picker');
+            }
+        });
+    });
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.fb-reaction-trigger')) {
+            document.querySelectorAll('.fb-reaction-trigger.show-picker').forEach(function(t) {
+                t.classList.remove('show-picker');
+            });
+        }
+    });
+});
+
+    // Auto-dismiss toasts after 4s
+    document.querySelectorAll('.fb-toast').forEach(function(toast) {
+        setTimeout(function() {
+            toast.style.animation = 'toastOut 0.3s ease-out forwards';
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 4000);
+    });
+
+    // Scroll to top button
+    var scrollBtn = document.createElement('button');
+    scrollBtn.className = 'fb-scroll-top';
+    scrollBtn.innerHTML = '<i class="bi bi-arrow-up"></i>';
+    scrollBtn.title = 'Retour en haut';
+    scrollBtn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    document.body.appendChild(scrollBtn);
+    window.addEventListener('scroll', function() {
+        scrollBtn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+    });
+
+    // Service Worker registration (PWA)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+    }
+
+    // Online status heartbeat
+    if (document.querySelector('.fb-bottombar') || document.querySelector('.fb-topbar')) {
+        setInterval(function() {
+            fetch('/posts/heartbeat/', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}}).catch(() => {});
+        }, 60000);
+    }
+
+    // Infinite scroll
+    var infinitePage = 1;
+    var infiniteLoading = false;
+    var infiniteSentinel = document.getElementById('infinite-sentinel');
+    if (infiniteSentinel) {
+        var observer = new IntersectionObserver(function(entries) {
+            if (entries[0].isIntersecting && !infiniteLoading) {
+                infiniteLoading = true;
+                infinitePage++;
+                fetch('/posts/feed/ajax/?page=' + infinitePage)
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.posts && data.posts.length > 0) {
+                            var container = document.getElementById('feed-container');
+                            data.posts.forEach(function(p) {
+                                var safeContent = p.content ? p.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') : '';
+                                var avatarHTML = p.avatar
+                                    ? '<img class="rounded-circle" src="' + p.avatar + '" width="48" height="48" style="object-fit:cover;border:2px solid var(--gold-light);" alt="">'
+                                    : '<i class="bi bi-person-circle" style="font-size:2.8rem;color:#9C8E82;"></i>';
+                                var imageHTML = p.image ? '<img src="' + p.image + '" class="fb-post-img" alt="">' : '';
+                                var postCard = document.createElement('div');
+                                postCard.className = 'fb-post-card';
+                                postCard.innerHTML =
+                                    '<header class="fb-post-header">' +
+                                        avatarHTML +
+                                        '<div class="fb-post-header-text">' +
+                                            '<span class="fb-post-author">' + p.author + '</span>' +
+                                            '<div class="fb-post-meta"><span>' + p.created_at + '</span></div>' +
+                                        '</div>' +
+                                    '</header>' +
+                                    '<div class="fb-post-body">' +
+                                        '<p class="fb-post-text">' + safeContent + '</p>' +
+                                        imageHTML +
+                                    '</div>' +
+                                    '<div class="fb-reactions-count">' +
+                                        (p.likes > 0 ? '<span class="fb-reactions-emojis"><span class="fb-reaction-badge" title="J\'aime">👍</span></span><span class="fb-reactions-text">' + p.likes + '</span>' : '') +
+                                        (p.comments > 0 ? '<span class="ms-auto">' + p.comments + ' commentaire' + (p.comments > 1 ? 's' : '') + '</span>' : '') +
+                                    '</div>' +
+                                    '<div class="fb-post-actions">' +
+                                        '<a href="/posts/' + p.id + '/" class="fb-post-action"><i class="bi bi-chat-left-text"></i> <span>Commenter</span></a>' +
+                                    '</div>';
+                                container.appendChild(postCard);
+                            });
+                        }
+                        if (!data.has_more) infiniteSentinel.style.display = 'none';
+                        infiniteLoading = false;
+                    })
+                    .catch(function() { infiniteLoading = false; });
+            }
+        }, {rootMargin: '200px'});
+        observer.observe(infiniteSentinel);
+    }
+});
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

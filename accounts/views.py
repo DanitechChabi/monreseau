@@ -1,8 +1,11 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.utils import translation
+from django.utils.translation import gettext as _
 from django.views.generic import CreateView, DetailView, UpdateView
 
 from .forms import ProfileUpdateForm, UserRegisterForm, UserUpdateForm
@@ -16,10 +19,34 @@ class RegisterView(CreateView):
     template_name = 'accounts/register.html'
     success_url = reverse_lazy('home')
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         response = super().form_valid(form)
+        profile = self.object.profile
+
+        # Langues parlées choisies à l'inscription (le Profile est créé par signal).
+        languages = list(form.cleaned_data.get('languages') or [])
+        if languages:
+            profile.languages.set(languages)
+
+        # Langue d'interface par défaut : la 1re langue choisie dont l'interface existe.
+        ui_language = next((lang for lang in languages if lang.is_ui_available), None)
+        if ui_language is not None:
+            profile.ui_language = ui_language
+            profile.save(update_fields=['ui_language'])
+            translation.activate(ui_language.code)
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, ui_language.code, max_age=365 * 24 * 3600)
+
         login(self.request, self.object)
-        messages.success(self.request, f'Bienvenue {self.object.username} ! Ton compte a été créé.')
+        messages.success(
+            self.request,
+            _('Bienvenue %(username)s ! Ton compte a été créé.')
+            % {'username': self.object.username},
+        )
         return response
 
 
@@ -101,7 +128,7 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
         if profile_form.is_valid():
             self.object = form.save()
             profile_form.save()
-            messages.success(self.request, 'Ton profil a bien été mis à jour.')
+            messages.success(self.request, _('Ton profil a bien été mis à jour.'))
             return redirect(self.get_success_url())
         # Le formulaire principal était valide mais pas le profil -> on réaffiche.
         return self.render_to_response(context)

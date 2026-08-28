@@ -1,49 +1,128 @@
-<div class="card shadow-sm mb-3">
-    <div class="card-body">
-        <div class="d-flex align-items-center mb-2">
-            {% if post.author.profile.avatar %}
-                <img src="{{ post.author.profile.avatar.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit:cover;" alt="Avatar">
-            {% else %}
-                <i class="bi bi-person-circle me-2 text-muted" style="font-size:2.5rem;"></i>
-            {% endif %}
-            <div class="me-auto">
-                <a href="{% url 'profile' post.author.username %}" class="fw-bold text-decoration-none text-dark">
-                    {{ post.author.get_full_name|default:post.author.username }}
-                </a>
-                <div class="text-muted small">{{ post.created_at|timesince }} ago</div>
-            </div>
+{% load i18n post_extras %}
+{% with user_reaction=post|get_user_reaction:user %}
 
-            {% if post.author == user %}
-            <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-label="Actions">
-                    <i class="bi bi-three-dots"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="{% url 'post_update' post.pk %}"><i class="bi bi-pencil"></i> Modifier</a></li>
-                    <li><a class="dropdown-item text-danger" href="{% url 'post_delete' post.pk %}"><i class="bi bi-trash"></i> Supprimer</a></li>
-                </ul>
+{# Post Card — LinkedIn + African style #}
+<article class="fb-post-card">
+    <header class="fb-post-header">
+        {% if post.author.profile.avatar %}
+            <a href="{% url 'profile' post.author.username %}">
+                <img class="rounded-circle" src="{{ post.author.profile.avatar.url }}" width="48" height="48" style="object-fit:cover;border:2px solid var(--gold-light);" alt="{% trans 'Avatar' %}">
+            </a>
+        {% else %}
+            <i class="bi bi-person-circle" style="font-size:2.8rem;color:#C4AF98;"></i>
+        {% endif %}
+        <div class="fb-post-header-text">
+            <a href="{% url 'profile' post.author.username %}" class="fb-post-author">
+                {{ post.author.get_full_name|default:post.author.username }}
+            </a>
+            <div class="fb-post-meta">
+                <span>{{ post.author.profile.location|default:"MonRéseau" }}</span>
+                <span>·</span>
+                <span>{{ post.created_at|timesince }}</span>
+                <span>·</span>
+                <i class="bi bi-globe2"></i>
             </div>
-            {% endif %}
         </div>
+        {% if post.author == user %}
+        <div class="dropdown">
+            <button class="btn btn-sm btn-fb-secondary rounded-circle px-2" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><a class="dropdown-item" href="{% url 'post_update' post.pk %}"><i class="bi bi-pencil me-2"></i>{% trans 'Modifier' %}</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'post_delete' post.pk %}"><i class="bi bi-trash me-2"></i>{% trans 'Supprimer' %}</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </header>
 
+    <div class="fb-post-body">
         {% if post.content %}
-            <p class="mb-2">{{ post.content|linebreaksbr }}</p>
+            <p class="fb-post-text">{{ post.content|linebreaksbr }}</p>
         {% endif %}
         {% if post.image %}
-            <img src="{{ post.image.url }}" class="img-fluid rounded mb-2" alt="Image de la publication">
+            <img src="{{ post.image.url }}" class="fb-post-img" alt="{% trans 'Image de la publication' %}">
         {% endif %}
-
-        <div class="d-flex align-items-center gap-3 border-top pt-2">
-            <form method="post" action="{% url 'post_like' post.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm {% if request.user in post.likes.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                    <i class="bi {% if request.user in post.likes.all %}bi-hand-thumbs-up-fill{% else %}bi-hand-thumbs-up{% endif %}"></i>
-                    {{ post.likes.count }}
-                </button>
-            </form>
-            <a href="{% url 'post_detail' post.pk %}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-chat"></i> {{ post.comments.count }}
-            </a>
-        </div>
     </div>
-</div>
+
+    {# Compteur de réactions #}
+    <div class="fb-reactions-count">
+        {% if post.likes.count %}
+            <span class="fb-reactions-emojis">
+                {% for reaction_type in post|get_unique_reactions %}
+                    <span class="fb-reaction-badge" title="{{ reaction_type.1 }}">{{ reaction_type.2 }}</span>
+                {% endfor %}
+            </span>
+            <span class="fb-reactions-text">{{ post.likes.count }}</span>
+        {% endif %}
+        {% if post.comments.count %}
+            <span class="ms-auto">{{ post.comments.count }} {% trans 'commentaires' %}</span>
+        {% endif %}
+    </div>
+
+    {# Actions : Réagir / Commenter / Partager #}
+    <div class="fb-post-actions">
+        <div class="fb-reaction-trigger" style="position:relative;">
+            <button type="button" class="fb-post-action fb-react-btn {% if user_reaction %}reacted{% endif %}"
+                    data-post-id="{{ post.pk }}" data-url="{% url 'post_like' post.pk %}">
+                {% if user_reaction %}
+                    <span class="fb-react-emoji">{{ user_reaction.emoji }}</span>
+                    <span class="fb-react-label">{{ user_reaction.get_reaction_type_display }}</span>
+                {% else %}
+                    <i class="bi bi-hand-thumbs-up"></i>
+                    <span>{% trans "J'aime" %}</span>
+                {% endif %}
+            </button>
+            <div class="fb-reaction-picker">
+                <form method="post" action="{% url 'post_like' post.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="reaction" value="like">
+                    <button type="submit" class="fb-reaction-opt" title="J'aime">👍</button>
+                </form>
+                <form method="post" action="{% url 'post_like' post.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="reaction" value="love">
+                    <button type="submit" class="fb-reaction-opt" title="Adore">❤️</button>
+                </form>
+                <form method="post" action="{% url 'post_like' post.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="reaction" value="celebrate">
+                    <button type="submit" class="fb-reaction-opt" title="Féliciter">🎉</button>
+                </form>
+                <form method="post" action="{% url 'post_like' post.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="reaction" value="funny">
+                    <button type="submit" class="fb-reaction-opt" title="Réjouir">😊</button>
+                </form>
+                <form method="post" action="{% url 'post_like' post.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="reaction" value="insightful">
+                    <button type="submit" class="fb-reaction-opt" title="Inspirant">💡</button>
+                </form>
+                <form method="post" action="{% url 'post_like' post.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="reaction" value="support">
+                    <button type="submit" class="fb-reaction-opt" title="Soutenir">🤝</button>
+                </form>
+            </div>
+        </div>
+        <a href="{% url 'post_detail' post.pk %}" class="fb-post-action">
+            <i class="bi bi-chat-left-text"></i>
+            <span>{% trans 'Commenter' %}</span>
+        </a>
+        <button type="button" class="fb-post-action" title="{% trans 'Partager' %}"
+                onclick="navigator.clipboard.writeText(location.origin + '{{ post.get_absolute_url }}');">
+            <i class="bi bi-arrow-repeat"></i>
+            <span>{% trans 'Partager' %}</span>
+        </button>
+        <form method="post" action="{% url 'post_bookmark' post.pk %}" class="flex-grow-1 d-flex m-0">
+            {% csrf_token %}
+            <button type="submit" class="fb-post-action flex-grow-1 {% if post|is_bookmarked:user %}bookmarked{% endif %}">
+                <i class="bi {% if post|is_bookmarked:user %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}"></i>
+                <span>{% if post|is_bookmarked:user %}{% trans 'Enregistré' %}{% else %}{% trans 'Enregistrer' %}{% endif %}</span>
+            </button>
+        </form>
+    </div>
+</article>
+{% endwith %}

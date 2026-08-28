@@ -1,22 +1,17 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}{% if object %}Modifier la page{% else %}Créer une page{% endif %}{% endblock %}
+{% block title %}{% if object %}{% trans 'Modifier la page' %}{% else %}{% trans 'Créer une page' %}{% endif %}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title mb-4">
-                    {% if object %}Modifier « {{ object.name }} »{% else %}Créer une page{% endif %}
-                </h3>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {% include '_form_fields.html' %}
-                    <button type="submit" class="btn btn-primary w-100 mt-2">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
+<div class="fb-card p-4" style="max-width:680px;margin:0 auto;">
+    <h3 class="mb-4">
+        {% if object %}{% blocktrans with page_name=object.name %}Modifier « {{ page_name }} »{% endblocktrans %}{% else %}{% trans 'Créer une page' %}{% endif %}
+    </h3>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include '_form_fields.html' with form=form %}
+        <button type="submit" class="btn btn-fb-primary w-100 mt-2">{% trans 'Enregistrer' %}</button>
+    </form>
 </div>
 {% endblock %}

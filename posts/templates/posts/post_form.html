@@ -1,24 +1,21 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}{% if object %}Modifier la publication{% else %}Nouvelle publication{% endif %}{% endblock %}
+{% block title %}{% if object %}{% trans 'Modifier la publication' %}{% else %}{% trans 'Nouvelle publication' %}{% endif %}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-7">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title mb-4">
-                    {% if object %}Modifier la publication{% else %}Créer une publication{% endif %}
-                </h3>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {% include '_form_fields.html' %}
-                    <button type="submit" class="btn btn-primary w-100 mt-2">
-                        {% if object %}Enregistrer{% else %}Publier{% endif %}
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+<div class="fb-card p-4" style="max-width:680px;margin:0 auto;">
+    <h3 class="mb-4 d-flex align-items-center gap-2">
+        <i class="bi bi-file-earmark-post text-primary"></i>
+        {% if object %}{% trans 'Modifier la publication' %}{% else %}{% trans 'Créer une publication' %}{% endif %}
+    </h3>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include '_form_fields.html' with form=form %}
+        <button type="submit" class="btn btn-fb-primary w-100 mt-2">
+            <i class="bi bi-send me-1"></i>
+            {% if object %}{% trans 'Enregistrer' %}{% else %}{% trans 'Publier' %}{% endif %}
+        </button>
+    </form>
 </div>
 {% endblock %}

@@ -1,0 +1,48 @@
+{% load i18n %}
+<nav class="mb-3">
+    <a class="fb-menu-item" href="{% url 'home' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#C99A3C,#A87F2E);"><i class="bi bi-house-door-fill"></i></span>
+        <span>{% trans "Fil d'actualite" %}</span>
+    </a>
+    <a class="fb-menu-item" href="{% url 'stories' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#A8544A,#7B2D26);"><i class="bi bi-play-circle-fill"></i></span>
+        <span>{% trans "Stories" %}</span>
+    </a>
+    <a class="fb-menu-item" href="{% url 'friend_list' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#4C7A5A,#2D5A3D);"><i class="bi bi-people-fill"></i></span>
+        <span>{% trans "Amis" %}</span>
+    </a>
+    <a class="fb-menu-item" href="{% url 'group_list' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#A8544A,#7B2D26);"><i class="bi bi-person-plus-fill"></i></span>
+        <span>{% trans "Groupes" %}</span>
+    </a>
+    <a class="fb-menu-item" href="{% url 'page_list' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#2A4F8F,#1A3C6E);"><i class="bi bi-file-earmark-post-fill"></i></span>
+        <span>{% trans "Pages" %}</span>
+    </a>
+    <div class="fb-menu-divider"></div>
+    <a class="fb-menu-item" href="{% url 'notification_list' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#8A3229,#5E1F1B);"><i class="bi bi-bell-fill"></i></span>
+        <span>{% trans "Notifications" %}</span>
+    </a>
+    <a class="fb-menu-item" href="{% url 'conversation_list' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#C99A3C,#A8544A);"><i class="bi bi-messenger"></i></span>
+        <span>{% trans "Messagerie" %}</span>
+    </a>
+    <a class="fb-menu-item" href="{% url 'post_bookmarks' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#2A4F8F,#1A3C6E);"><i class="bi bi-bookmark-fill"></i></span>
+        <span>{% trans "Enregistres" %}</span>
+    </a>
+    <a class="fb-menu-item" href="{% url 'search' %}">
+        <span class="fb-menu-icon" style="background:linear-gradient(135deg,#4C7A5A,#2D5A3D);"><i class="bi bi-search"></i></span>
+        <span>{% trans "Recherche" %}</span>
+    </a>
+    <a class="fb-menu-item" href="{% url 'profile' request.user.username %}">
+        {% if request.user.profile.avatar %}
+            <img class="fb-menu-icon" src="{{ request.user.profile.avatar.url }}" alt="Avatar" style="border:2px solid #C99A3C;">
+        {% else %}
+            <span class="fb-menu-icon" style="background:linear-gradient(135deg,#7B2D26,#471713);"><i class="bi bi-person-fill"></i></span>
+        {% endif %}
+        <span>{% trans "Mon profil" %}</span>
+    </a>
+</nav>

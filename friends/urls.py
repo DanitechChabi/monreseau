@@ -11,4 +11,6 @@ urlpatterns = [
     path('reject/<int:pk>/', views.RejectFriendRequestView.as_view(), name='reject_friend_request'),
     path('cancel/<int:pk>/', views.CancelFriendRequestView.as_view(), name='cancel_friend_request'),
     path('unfriend/<int:user_id>/', views.UnfriendView.as_view(), name='unfriend'),
+    path('block/<int:user_id>/', views.BlockUserView.as_view(), name='block_user'),
+    path('unblock/<int:user_id>/', views.UnblockUserView.as_view(), name='unblock_user'),
 ]

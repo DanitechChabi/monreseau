@@ -1,52 +1,49 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Notifications{% endblock %}
+{% block title %}{% trans 'Notifications' %}{% endblock %}
 
 {% block content %}
-<h3 class="mb-3"><i class="bi bi-bell"></i> Notifications</h3>
+<h3 class="mb-3"><i class="bi bi-bell"></i> {% trans 'Notifications' %}</h3>
 
-<div class="card shadow-sm">
-    <ul class="list-group list-group-flush">
-        {% for n in notifications %}
-        <li class="list-group-item d-flex align-items-center gap-3 {% if not n.is_read %}bg-light{% endif %}">
-            {% if n.notification_type == 'friend_request' %}
-                <i class="bi bi-person-plus text-primary" style="font-size:1.4rem;"></i>
-            {% elif n.notification_type == 'friend_accepted' %}
-                <i class="bi bi-person-check text-success" style="font-size:1.4rem;"></i>
-            {% elif n.notification_type == 'like' %}
-                <i class="bi bi-hand-thumbs-up text-danger" style="font-size:1.4rem;"></i>
-            {% elif n.notification_type == 'comment' %}
-                <i class="bi bi-chat text-info" style="font-size:1.4rem;"></i>
-            {% elif n.notification_type == 'message' %}
-                <i class="bi bi-chat-dots text-primary" style="font-size:1.4rem;"></i>
-            {% else %}
-                <i class="bi bi-bell text-secondary" style="font-size:1.4rem;"></i>
-            {% endif %}
+{% for n in notifications %}
+<div class="fb-list-group-row {% if not n.is_read %}bg-light{% endif %}">
+    {% if n.notification_type == 'friend_request' %}
+        <i class="bi bi-person-plus text-primary" style="font-size:1.4rem;"></i>
+    {% elif n.notification_type == 'friend_accepted' %}
+        <i class="bi bi-person-check text-success" style="font-size:1.4rem;"></i>
+    {% elif n.notification_type == 'like' %}
+        <i class="bi bi-hand-thumbs-up text-danger" style="font-size:1.4rem;"></i>
+    {% elif n.notification_type == 'comment' %}
+        <i class="bi bi-chat text-info" style="font-size:1.4rem;"></i>
+    {% elif n.notification_type == 'message' %}
+        <i class="bi bi-chat-dots text-primary" style="font-size:1.4rem;"></i>
+    {% else %}
+        <i class="bi bi-bell text-secondary" style="font-size:1.4rem;"></i>
+    {% endif %}
 
-            <a href="{% if n.link %}{{ n.link }}{% else %}{% url 'notification_list' %}{% endif %}"
-               class="text-decoration-none flex-grow-1 {% if n.is_read %}text-muted{% else %}fw-semibold text-dark{% endif %}">
-                {{ n.text }}
-            </a>
-            <span class="text-muted small text-nowrap">{{ n.created_at|timesince }}</span>
-        </li>
-        {% empty %}
-        <li class="list-group-item text-center text-muted py-4">
-            <i class="bi bi-bell-slash display-4"></i>
-            <p class="mt-2 mb-0">Aucune notification pour le moment.</p>
-        </li>
-        {% endfor %}
-    </ul>
+    <a href="{% if n.link %}{{ n.link }}{% else %}{% url 'notification_list' %}{% endif %}"
+       class="text-decoration-none flex-grow-1 {% if n.is_read %}text-muted{% else %}fw-semibold text-dark{% endif %}">
+        {{ n.text }}
+    </a>
+    <span class="text-muted small text-nowrap">{{ n.created_at|timesince }}</span>
 </div>
+{% empty %}
+<div class="fb-empty">
+    <i class="bi bi-bell-slash" style="font-size:3rem;color:#b0b3b8;"></i>
+    <p class="mt-3 mb-0">{% trans 'Aucune notification pour le moment.' %}</p>
+</div>
+{% endfor %}
 
 {% if is_paginated %}
-<nav class="mt-3">
+<nav class="mt-3 fb-pagination">
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans 'Précédent' %}</a></li>
         {% endif %}
-        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        <li class="page-item disabled"><span class="page-link">{% blocktrans with n=page_obj.number total=page_obj.paginator.num_pages %}Page {{ n }} / {{ total }}{% endblocktrans %}</span></li>
         {% if page_obj.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans 'Suivant' %}</a></li>
         {% endif %}
     </ul>
 </nav>

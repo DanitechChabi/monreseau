@@ -1,0 +1,68 @@
+{% comment %}
+Logo MonRéseau — le léopard d'Abomey, brodé d'or sur bordeaux royal.
+Symbole du royaume d'Abomey (emblème du roi Glélé) : la force et la vigilance.
+Utilisable partout : topbar (conteneur .fb-logo) ou pages d'auth (.fb-auth-badge).
+{% endcomment %}
+<svg viewBox="0 0 48 48" role="img" aria-label="MonRéseau — le léopard d'Abomey" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="abomey-badge" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#A8544A"/>
+            <stop offset="1" stop-color="#5E1F1B"/>
+        </linearGradient>
+        <linearGradient id="abomey-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#E8C66A"/>
+            <stop offset="0.55" stop-color="#C99A3C"/>
+            <stop offset="1" stop-color="#A87F2E"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Médaille bordeaux (fond) -->
+    <rect x="0" y="0" width="48" height="48" rx="12" fill="url(#abomey-badge)"/>
+
+    <!-- Liseré appliqué (bordure brodée d'or) -->
+    <rect x="3" y="3" width="42" height="42" rx="9" fill="none" stroke="#C99A3C" stroke-width="1.4" opacity="0.9"/>
+    <!-- Cornes d'appliqué -->
+    <circle cx="8"  cy="8"  r="1.3" fill="#E8C66A"/>
+    <circle cx="40" cy="8"  r="1.3" fill="#E8C66A"/>
+    <circle cx="8"  cy="40" r="1.3" fill="#E8C66A"/>
+    <circle cx="40" cy="40" r="1.3" fill="#E8C66A"/>
+
+    <!-- Léopard (tête stylisée) -->
+    <g>
+        <!-- Oreilles -->
+        <path d="M13 15 L7 4 L19 10 Z" fill="url(#abomey-gold)"/>
+        <path d="M35 15 L41 4 L29 10 Z" fill="url(#abomey-gold)"/>
+        <path d="M13 13 L10 7 L16 10 Z" fill="#5E1F1B" opacity="0.55"/>
+        <path d="M35 13 L38 7 L32 10 Z" fill="#5E1F1B" opacity="0.55"/>
+
+        <!-- Tête -->
+        <path d="M24 11 C16 11 11.5 17 11.5 24.5 C11.5 33 17 38.5 24 38.5 C31 38.5 36.5 33 36.5 24.5 C36.5 17 32 11 24 11 Z"
+              fill="url(#abomey-gold)"/>
+
+        <!-- Taches du pelage -->
+        <circle cx="17.5" cy="18.5" r="1.5" fill="#7B2D26"/>
+        <circle cx="24"    cy="15"   r="1.5" fill="#7B2D26"/>
+        <circle cx="30.5"  cy="18.5" r="1.5" fill="#7B2D26"/>
+        <circle cx="14.5"  cy="26"   r="1.3" fill="#7B2D26"/>
+        <circle cx="33.5"  cy="26"   r="1.3" fill="#7B2D26"/>
+        <circle cx="16.5"  cy="32.5" r="1.1" fill="#7B2D26"/>
+        <circle cx="31.5"  cy="32.5" r="1.1" fill="#7B2D26"/>
+
+        <!-- Yeux -->
+        <ellipse cx="18.6" cy="23" rx="1.9" ry="2.5" fill="#471713"/>
+        <ellipse cx="29.4" cy="23" rx="1.9" ry="2.5" fill="#471713"/>
+        <circle cx="19.2" cy="22.2" r="0.7" fill="#E8C66A"/>
+        <circle cx="30"   cy="22.2" r="0.7" fill="#E8C66A"/>
+
+        <!-- Museau -->
+        <path d="M24 33.2 C21.6 33.2 20.2 31.6 20.2 29.8 C20.2 28 24 26.8 24 26.8 C24 26.8 27.8 28 27.8 29.8 C27.8 31.6 26.4 33.2 24 33.2 Z"
+              fill="#E8C66A" stroke="#471713" stroke-width="0.8"/>
+        <path d="M22.1 30.4 L24 28.9 L25.9 30.4 L25 32 L23 32 Z" fill="#471713"/>
+
+        <!-- Points de moustaches -->
+        <circle cx="20.6" cy="34.6" r="0.7" fill="#471713" opacity="0.7"/>
+        <circle cx="27.4" cy="34.6" r="0.7" fill="#471713" opacity="0.7"/>
+        <circle cx="18.8" cy="36.4" r="0.6" fill="#471713" opacity="0.7"/>
+        <circle cx="29.2" cy="36.4" r="0.6" fill="#471713" opacity="0.7"/>
+    </g>
+</svg>

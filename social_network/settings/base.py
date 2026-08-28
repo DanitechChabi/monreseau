@@ -33,9 +33,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Applique la langue d'interface choisie dans le profil (si connecté).
+    'core.middleware.ProfileLanguageMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -54,6 +57,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 # Badges non-lus (notifications + messages) affichés dans la navbar
                 'core.context_processors.unread_counts',
+                # Contacts + suggestions pour la colonne droite (façon Facebook)
+                'core.context_processors.sidebar_data',
             ],
         },
     },
@@ -85,6 +90,41 @@ LANGUAGE_CODE = 'fr-fr'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
+
+# Langues disponibles. `fr` est la langue source ; fon et yor ont une
+# interface (partiellement) traduite ; les autres langues béninoises servent
+# de « profil » (choix des langues parlées) et retombent sur le français.
+LANGUAGES = [
+    ('fr', 'Français'),
+    ('fon', 'Fɔ̀ngbè'),
+    ('yor', 'Yorùbá'),
+    ('ajg', 'Adja'),
+    ('guw', 'Goun'),
+    ('bba', 'Bariba'),
+    ('ddn', 'Dendi'),
+    ('gej', 'Gen (Mina)'),
+    ('fue', 'Peul'),
+    ('tbz', 'Ditammari'),
+    ('wwa', 'Waama'),
+    ('pil', 'Yom'),
+    ('dop', 'Lokpa'),
+    ('ayb', 'Ayizo'),
+    ('ife', 'Ifè'),
+    ('mkl', 'Mokole'),
+    ('xna', 'Nago'),
+    ('blo', 'Anii'),
+    ('bqc', 'Boko'),
+    ('xwl', 'Xwla'),
+    ('xwe', 'Xweda'),
+    ('kqk', 'Kotafon'),
+    ('tfi', 'Tofin'),
+    ('cbe', 'Cabe'),
+    ('kbp', 'Kabiyé'),
+    ('sxw', 'Saxwe'),
+]
+
+# Fichiers de traduction (locale/<code>/LC_MESSAGES/django.po + .mo)
+LOCALE_PATHS = [BASE_DIR / 'locale']
 
 
 # Static files (CSS, JavaScript, Images)

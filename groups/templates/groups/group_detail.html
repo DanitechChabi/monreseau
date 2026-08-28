@@ -1,41 +1,46 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ group.name }}{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm mb-3">
-    <div class="card-body">
-        <div class="d-flex align-items-center gap-3">
+{# ============ En-tête du groupe ============ #}
+<div class="fb-profile-card">
+    <div class="p-4">
+        <div class="d-flex flex-wrap align-items-center gap-3">
             {% if group.image %}
-                <img src="{{ group.image.url }}" alt="{{ group.name }}" class="rounded" width="80" height="80" style="object-fit:cover;">
+                <img src="{{ group.image.url }}" alt="{{ group.name }}" class="rounded-circle" width="80" height="80" style="object-fit:cover;">
             {% else %}
-                <i class="bi bi-people-fill text-primary" style="font-size:4rem;"></i>
+                <i class="bi bi-people-fill" style="font-size:4rem;color:#b0b3b8;"></i>
             {% endif %}
+
             <div class="flex-grow-1">
                 <h3 class="mb-0">{{ group.name }}</h3>
                 {% if group.description %}
                     <p class="text-muted mb-1">{{ group.description }}</p>
                 {% endif %}
                 <small class="text-muted">
-                    <i class="bi bi-person-fill"></i> {{ group.member_count }} membre{{ group.member_count|pluralize }}
-                    · créé par {{ group.creator.username|default:'inconnu' }}
+                    <i class="bi bi-person-fill"></i>
+                    {% blocktrans count counter=group.member_count %}{{ counter }} membre{% plural %}{{ counter }} membres{% endblocktrans %}
+                    · {% blocktrans with creator=group.creator.username|default:'inconnu' %}créé par {{ creator }}{% endblocktrans %}
                 </small>
             </div>
-            <div class="d-flex flex-column gap-2">
+
+            <div class="d-flex flex-column gap-2 justify-content-end pb-2">
                 {% if is_member %}
                     <form method="post" action="{% url 'group_leave' group.pk %}">
                         {% csrf_token %}
-                        <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-left"></i> Quitter</button>
+                        <button class="btn btn-fb-secondary btn-sm"><i class="bi bi-box-arrow-left"></i> {% trans 'Quitter' %}</button>
                     </form>
                 {% else %}
                     <form method="post" action="{% url 'group_join' group.pk %}">
                         {% csrf_token %}
-                        <button class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Rejoindre</button>
+                        <button class="btn btn-fb-primary btn-sm"><i class="bi bi-person-plus"></i> {% trans 'Rejoindre' %}</button>
                     </form>
                 {% endif %}
                 {% if group.creator == user %}
-                    <a href="{% url 'group_update' group.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i> Modifier</a>
-                    <a href="{% url 'group_delete' group.pk %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Supprimer</a>
+                    <a href="{% url 'group_update' group.pk %}" class="btn btn-fb-secondary btn-sm"><i class="bi bi-pencil"></i> {% trans 'Modifier' %}</a>
+                    <a href="{% url 'group_delete' group.pk %}" class="btn btn-fb-danger btn-sm"><i class="bi bi-trash"></i> {% trans 'Supprimer' %}</a>
                 {% endif %}
             </div>
         </div>
@@ -43,67 +48,83 @@
 </div>
 
 <div class="row g-3">
+    {# ============ Colonne centrale : publications ============ #}
     <div class="col-lg-8">
         {% if is_member %}
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <form method="post" action="{% url 'group_post_create' group.pk %}">
-                    {% csrf_token %}
-                    <div class="mb-2">
-                        <textarea name="content" class="form-control" rows="2" placeholder="Publier dans « {{ group.name }} »…"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i> Publier</button>
-                </form>
+        <div class="fb-composer-card">
+            <div class="fb-composer">
+                {% if request.user.profile.avatar %}
+                    <img class="rounded-circle" src="{{ request.user.profile.avatar.url }}" width="40" height="40" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+                {% else %}
+                    <i class="bi bi-person-circle" style="font-size:2.5rem;color:#b0b3b8;"></i>
+                {% endif %}
+                <span class="fb-composer-pill">{% blocktrans with group_name=group.name %}Publier dans « {{ group_name }} »…{% endblocktrans %}</span>
             </div>
+            <form method="post" action="{% url 'group_post_create' group.pk %}">
+                {% csrf_token %}
+                <div class="px-3 pb-2">
+                    <textarea name="content" class="form-control" rows="2" placeholder="{% blocktrans with group_name=group.name %}Publier dans « {{ group_name }} »…{% endblocktrans %}"></textarea>
+                </div>
+                <div class="fb-composer-footer">
+                    <button type="submit" class="fb-composer-btn" style="cursor:pointer;">
+                        <i class="bi bi-send text-primary"></i> {% trans 'Publier' %}
+                    </button>
+                </div>
+            </form>
         </div>
         {% endif %}
 
         {% for p in group.posts.all %}
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    {% if p.author.profile.avatar %}
-                        <img src="{{ p.author.profile.avatar.url }}" class="rounded-circle" width="36" height="36" style="object-fit:cover;" alt="Avatar">
-                    {% else %}
-                        <i class="bi bi-person-circle text-muted" style="font-size:2rem;"></i>
-                    {% endif %}
-                    <div>
-                        <a href="{% url 'profile' p.author.username %}" class="fw-bold text-decoration-none text-dark small">
-                            {{ p.author.get_full_name|default:p.author.username }}
-                        </a>
-                        <div class="text-muted small">{{ p.created_at|timesince }}</div>
+        <article class="fb-post-card">
+            <header class="fb-post-header">
+                {% if p.author.profile.avatar %}
+                    <a href="{% url 'profile' p.author.username %}">
+                        <img class="rounded-circle" src="{{ p.author.profile.avatar.url }}" width="40" height="40" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+                    </a>
+                {% else %}
+                    <i class="bi bi-person-circle text-muted" style="font-size:2.5rem;"></i>
+                {% endif %}
+                <div class="flex-grow-1">
+                    <a href="{% url 'profile' p.author.username %}" class="fw-semibold text-decoration-none text-dark">
+                        {{ p.author.get_full_name|default:p.author.username }}
+                    </a>
+                    <div class="text-muted small d-flex align-items-center gap-1">
+                        {{ p.created_at|timesince }} · <i class="bi bi-globe-europe-africa"></i>
                     </div>
                 </div>
-                <p class="mb-0">{{ p.content|linebreaksbr }}</p>
+            </header>
+            <div class="fb-post-body">
+                <p class="fb-post-text">{{ p.content|linebreaksbr }}</p>
             </div>
-        </div>
+        </article>
         {% empty %}
-        <div class="card shadow-sm">
-            <div class="card-body text-center text-muted">
-                {% if is_member %}Aucune publication dans ce groupe pour l'instant.{% else %}Rejoins le groupe pour publier et voir les publications.{% endif %}
-            </div>
+        <div class="fb-empty">
+            <i class="bi bi-chat-dots" style="font-size:3rem;color:#b0b3b8;"></i>
+            <p class="mt-3 mb-0">
+                {% if is_member %}{% trans 'Aucune publication dans ce groupe pour l\'instant.' %}
+                {% else %}{% trans 'Rejoins le groupe pour publier et voir les publications.' %}{% endif %}
+            </p>
         </div>
         {% endfor %}
     </div>
 
+    {# ============ Colonne latérale : membres ============ #}
     <div class="col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-header"><i class="bi bi-people"></i> Membres ({{ group.member_count }})</div>
-            <ul class="list-group list-group-flush">
-                {% for m in group.members.all %}
-                <li class="list-group-item d-flex align-items-center gap-2">
-                    {% if m.profile.avatar %}
-                        <img src="{{ m.profile.avatar.url }}" class="rounded-circle" width="28" height="28" style="object-fit:cover;" alt="Avatar">
-                    {% else %}
-                        <i class="bi bi-person-circle text-muted" style="font-size:1.5rem;"></i>
-                    {% endif %}
-                    <a href="{% url 'profile' m.username %}" class="text-decoration-none small">{{ m.get_full_name|default:m.username }}</a>
-                </li>
-                {% empty %}
-                <li class="list-group-item text-muted small">Aucun membre.</li>
-                {% endfor %}
-            </ul>
+        <h6 class="fb-section-title px-2"><i class="bi bi-people"></i> {% blocktrans with count=group.member_count %}Membres ({{ count }}){% endblocktrans %}</h6>
+        {% for m in group.members.all %}
+        <div class="fb-list-group-row">
+            {% if m.profile.avatar %}
+                <img src="{{ m.profile.avatar.url }}" class="rounded-circle" width="28" height="28" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+            {% else %}
+                <i class="bi bi-person-circle text-muted" style="font-size:1.5rem;"></i>
+            {% endif %}
+            <a href="{% url 'profile' m.username %}" class="text-decoration-none small flex-grow-1">{{ m.get_full_name|default:m.username }}</a>
         </div>
+        {% empty %}
+        <div class="fb-empty">
+            <p class="mb-0">{% trans 'Aucun membre.' %}</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

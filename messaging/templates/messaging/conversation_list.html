@@ -1,56 +1,53 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Messages{% endblock %}
+{% block title %}{% trans 'Messages' %}{% endblock %}
 
 {% block content %}
-<h3 class="mb-3"><i class="bi bi-chat-dots"></i> Messages</h3>
+<h3 class="mb-3"><i class="bi bi-chat-dots"></i> {% trans 'Messages' %}</h3>
 
-<div class="card shadow-sm">
-    <ul class="list-group list-group-flush">
-        {% for c in conversations %}
-        <li class="list-group-item p-0">
-            {% for p in c.participants.all %}
-                {% if p != user %}
-                <a href="{% url 'conversation_detail' c.pk %}" class="d-flex align-items-center gap-3 p-3 text-decoration-none text-dark">
-                    {% if p.profile.avatar %}
-                        <img src="{{ p.profile.avatar.url }}" class="rounded-circle" width="48" height="48" style="object-fit:cover;" alt="Avatar">
-                    {% else %}
-                        <i class="bi bi-person-circle text-muted" style="font-size:2.5rem;"></i>
-                    {% endif %}
-                    <div class="flex-grow-1 overflow-hidden">
-                        <strong>{{ p.get_full_name|default:p.username }}</strong>
-                        <div class="text-muted small text-truncate">
-                            {% with last=c.messages.last %}
-                                {% if last %}{{ last.body }}{% else %}Nouvelle conversation{% endif %}
-                            {% endwith %}
-                        </div>
-                    </div>
-                    {% if c.unread %}
-                        <span class="badge rounded-pill bg-danger">{{ c.unread }}</span>
-                    {% endif %}
-                </a>
-                {% endif %}
-            {% endfor %}
-        </li>
-        {% empty %}
-        <li class="list-group-item text-center text-muted py-4">
-            <i class="bi bi-envelope display-4"></i>
-            <p class="mt-2 mb-0">Aucune conversation pour le moment.<br>
-            Rends-toi sur le profil d'un ami et clique sur « Message ».</p>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+{% for c in conversations %}
+    {% for p in c.participants.all %}
+        {% if p != user %}
+        <a href="{% url 'conversation_detail' c.pk %}" class="fb-list-group-row text-decoration-none text-dark">
+            {% if p.profile.avatar %}
+                <img src="{{ p.profile.avatar.url }}" class="rounded-circle" width="48" height="48" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+            {% else %}
+                <i class="bi bi-person-circle" style="font-size:2.5rem;color:#b0b3b8;"></i>
+            {% endif %}
+            <div class="flex-grow-1 overflow-hidden">
+                <strong class="d-block">{{ p.get_full_name|default:p.username }}</strong>
+                <div class="text-muted small text-truncate">
+                    {% with last=c.messages.last %}
+                        {% if last %}{{ last.body }}{% else %}{% trans 'Nouvelle conversation' %}{% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% if c.unread %}
+                <span class="badge rounded-pill bg-danger">{{ c.unread }}</span>
+            {% endif %}
+        </a>
+        {% endif %}
+    {% endfor %}
+{% empty %}
+    <div class="fb-empty">
+        <i class="bi bi-chat-dots" style="font-size:3rem;color:#b0b3b8;"></i>
+        <p class="mt-3 mb-0">
+            {% trans 'Aucune conversation pour le moment.' %}<br>
+            {% trans "Rends-toi sur le profil d'un ami et clique sur « Message »." %}
+        </p>
+    </div>
+{% endfor %}
 
 {% if is_paginated %}
-<nav class="mt-3">
+<nav class="mt-3 fb-pagination">
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans 'Précédent' %}</a></li>
         {% endif %}
-        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        <li class="page-item disabled"><span class="page-link">{% blocktrans with n=page_obj.number total=page_obj.paginator.num_pages %}Page {{ n }} / {{ total }}{% endblocktrans %}</span></li>
         {% if page_obj.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans 'Suivant' %}</a></li>
         {% endif %}
     </ul>
 </nav>

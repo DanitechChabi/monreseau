@@ -20,13 +20,16 @@ class PostForm(forms.ModelForm):
 
 
 class CommentForm(forms.ModelForm):
-    """Formulaire de commentaire."""
+    """Formulaire de commentaire (texte ou audio)."""
 
     class Meta:
         model = Comment
-        fields = ['content']
+        fields = ['content', 'audio']
         widgets = {
-            'content': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Écrire un commentaire…'}),
+            'content': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Écrire un commentaire…',
+            }),
         }
 
     def __init__(self, *args, **kwargs):

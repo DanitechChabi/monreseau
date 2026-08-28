@@ -1,0 +1,469 @@
+# MonRéseau — Yorùbá
+# Traduction best-effort des chaînes principales. Les chaînes non traduites
+# (msgstr vide) retombent automatiquement sur le français (msgid).
+# À affiner par des locuteurs natifs yoruba.
+msgid ""
+msgstr ""
+"Project-Id-Version: MonRéseau\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-09\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: yor\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Accepter"
+msgstr "Gbà"
+
+msgid "Accueil"
+msgstr "Ilé"
+
+msgid "Actions"
+msgstr "Àwọn ìgbéṣe"
+
+msgid "Ajouter"
+msgstr "Fi sí"
+
+msgid "Ajouter en ami"
+msgstr "Fi sí ọrẹ́"
+
+msgid "Amis"
+msgstr "Àwọn ọrẹ́"
+
+msgid "Annuler"
+msgstr "Fagilé"
+
+msgid "Avatar"
+msgstr "Àwòrán ẹni"
+
+msgid "Cette action est irréversible."
+msgstr "Kò lè yípadà ìgbéṣe yìí."
+
+msgid "Commenter"
+msgstr "Lọ́rọ̀"
+
+msgid "Compte"
+msgstr "Àkọọ́lẹ̀"
+
+msgid "Connexion"
+msgstr "Wọlẹ̀"
+
+msgid "Contacts"
+msgstr "Àwọn ènìyàn rẹ"
+
+msgid "Conversation"
+msgstr "Ìjíròrò"
+
+msgid "Copier le lien"
+msgstr "Dakọ ìsopọ̀"
+
+msgid "Créer un compte"
+msgstr "Ṣẹ̀dá àkọọ́lẹ̀"
+
+msgid "Créer un groupe"
+msgstr "Ṣẹ̀dá ẹgbẹ́"
+
+msgid "Créer un nouveau compte"
+msgstr "Ṣẹ̀dá àkọọ́lẹ̀ tuntun"
+
+msgid "Créer une page"
+msgstr "Ṣẹ̀dá ojú ìwé"
+
+msgid "Créer une publication"
+msgstr "Ṣẹ̀dá ìtẹ̀jáde"
+
+msgid "Créer une story"
+msgstr "Ṣẹ̀dá ìtàn"
+
+msgid "C’est rapide et facile."
+msgstr "Ó yára ó sì rọrùn."
+
+msgid "Demande envoyée"
+msgstr "A ti rán ìbéèrè"
+
+msgid "Demandes"
+msgstr "Àwọn ìbéèrè"
+
+msgid "Demandes d'amitié"
+msgstr "Àwọn ìbéèrè ọrẹ́"
+
+msgid "Déconnexion"
+msgstr "Jáde"
+
+msgid "Découvre des suggestions"
+msgstr "Wo àwọn ìmọ̀ràn"
+
+msgid "Déjà membre ? Connecte-toi"
+msgstr "O ti ní àkọọ́lẹ̀? Wọlẹ̀"
+
+msgid "Enregistrer"
+msgstr "Fipamọ́"
+
+msgid "Envoyer"
+msgstr "Ránṣẹ́"
+
+msgid "Fil d’actualité"
+msgstr "Ìròyìn"
+
+msgid "Groupes"
+msgstr "Àwọn ẹgbẹ́"
+
+msgid "Image de la publication"
+msgstr "Àwòrán ìtẹ̀jáde"
+
+msgid "Inscription"
+msgstr "Forúkọ̀ sílẹ̀"
+
+msgid "J’aime"
+msgstr "Mo fẹ́ràn"
+
+msgid "Langue"
+msgstr "Èdè"
+
+msgid "Langues"
+msgstr "Àwọn èdè"
+
+msgid "Le réseau social du Bénin — Fon, Yoruba, Adja et bien d’autres langues."
+msgstr "Nẹ́tíwọ́kì ìbánisọ̀rọ̀ ti Benín — Fon, Yorùbá, Adja àti ọ̀pọ̀lọpọ̀ àwọn èdè mìíràn."
+
+msgid "Mes amis"
+msgstr "Àwọn ọrẹ́ mi"
+
+msgid "Message"
+msgstr "Ìròyìn"
+
+msgid "Messagerie"
+msgstr "Àpótí ìròyìn"
+
+msgid "Messages"
+msgstr "Àwọn ìròyìn"
+
+msgid "Modifier"
+msgstr "Ṣàtúnṣe"
+
+msgid "Modifier la page"
+msgstr "Ṣàtúnṣe ojú ìwé"
+
+msgid "Modifier la publication"
+msgstr "Ṣàtúnṣe ìtẹ̀jáde"
+
+msgid "Modifier le groupe"
+msgstr "Ṣàtúnṣe ẹgbẹ́"
+
+msgid "Modifier le profil"
+msgstr "Ṣàtúnṣe profáìlì"
+
+msgid "Mon Réseau"
+msgstr "Nẹ́tíwọ́kì mi"
+
+msgid "Mon profil"
+msgstr "Profáìlì mi"
+
+msgid "Ne plus suivre"
+msgstr "Dá tẹ̀lé dùn"
+
+msgid "Notifications"
+msgstr "Àwọn ìfilọ̀lẹ̀"
+
+msgid "Nouvelle conversation"
+msgstr "Ìjíròrò tuntun"
+
+msgid "Nouvelle publication"
+msgstr "Ìtẹ̀jáde tuntun"
+
+msgid "Oui, supprimer"
+msgstr "Bẹ́ẹ̀ ni, parẹ́"
+
+msgid "Pages"
+msgstr "Àwọn ojú ìwé"
+
+msgid "Partager"
+msgstr "Pín"
+
+msgid "Photo"
+msgstr "Àwòrán"
+
+msgid "Photo de couverture"
+msgstr "Àwòrán ìkúnlẹ̀"
+
+msgid "Profil public"
+msgstr "Profáìlì gbangba"
+
+msgid "Précédent"
+msgstr "Ìsáájú"
+
+msgid "Publications"
+msgstr "Àwọn ìtẹ̀jáde"
+
+msgid "Publier"
+msgstr "Tẹ̀ jáde"
+
+msgid "Quitter"
+msgstr "Jáde kúrò"
+
+msgid "Recherche"
+msgstr "Ìwádií"
+
+msgid "Rechercher"
+msgstr "Wá"
+
+msgid "Rechercher des personnes…"
+msgstr "Wá àwọn ènìyàn…"
+
+msgid "Refuser"
+msgstr "Kọ̀"
+
+msgid "Rejoindre"
+msgstr "Dara pọ̀"
+
+msgid "Retirer"
+msgstr "Yọ̀ kúrò"
+
+msgid "Se connecter"
+msgstr "Wọlẹ̀"
+
+msgid "Suggestions"
+msgstr "Àwọn ìmọ̀ràn"
+
+msgid "Suggestions d'amis"
+msgstr "Àwọn ìmọ̀ràn ọrẹ́"
+
+msgid "Suggestions pour vous"
+msgstr "Àwọn ìmọ̀ràn fún ọ"
+
+msgid "Suivant"
+msgstr "Tí ń bọ̀"
+
+msgid "Suivre"
+msgstr "Tẹ̀lé"
+
+msgid "Supprimer"
+msgstr "Parẹ́"
+
+msgid "Supprimer cette publication ?"
+msgstr "Parẹ́ ìtẹ̀jáde yìí?"
+
+msgid "Supprimer la page"
+msgstr "Parẹ́ ojú ìwé"
+
+msgid "Supprimer la publication"
+msgstr "Parẹ́ ìtẹ̀jáde"
+
+msgid "Supprimer le commentaire"
+msgstr "Parẹ́ ẹ̀sọ̀"
+
+msgid "Supprimer le groupe"
+msgstr "Parẹ́ ẹgbẹ́"
+
+msgid "S’inscrire"
+msgstr "Forúkọ̀ sílẹ̀"
+
+msgid "Tu n'as pas encore d'amis."
+msgstr "Ò ì tí ní ọrẹ́."
+
+msgid "Voir la page"
+msgstr "Wo ojú ìwé"
+
+msgid "Voir le groupe"
+msgstr "Wo ẹgbẹ́"
+
+msgid "Voir le profil"
+msgstr "Wo profáìlì"
+
+msgid "commentaires"
+msgstr "ẹ̀sọ̀"
+
+# --- Chaînes des vues Python ---
+
+msgid "Bienvenue %(username)s ! Ton compte a été créé."
+msgstr "Kú àbọ̀, %(username)s! A ti dá àkọọ́lẹ̀ rẹ."
+
+msgid "Ton profil a bien été mis à jour."
+msgstr "A ti ṣàtúnṣe profáìlì rẹ dáadáa."
+
+msgid "Impossible de t'ajouter toi-même en ami."
+msgstr "Kò ṣeé ṣe láti fi ara rẹ sí ọrẹ́."
+
+msgid "Une demande est déjà en cours ou vous êtes déjà amis."
+msgstr "Ìbéèrè kan ti wà tàbí kí ẹ jẹ́ ọrẹ́ tẹ́lẹ̀."
+
+msgid "Demande d'ami envoyée à %(name)s."
+msgstr "A ti rán ìbéèrè ọrẹ́ sí %(name)s."
+
+msgid "Vous êtes maintenant amis avec %(name)s."
+msgstr "Ẹ̀yin àti %(name)s ti di ọrẹ́."
+
+msgid "Demande d'ami de %(name)s refusée."
+msgstr "A ti kọ̀ ìbéèrè ọrẹ́ %(name)s."
+
+msgid "Demande d'ami annulée pour %(name)s."
+msgstr "A ti fagilé ìbéèrè ọrẹ́ fún %(name)s."
+
+msgid "Vous n'êtes plus ami avec %(name)s."
+msgstr "Ò ì jẹ́ ọrẹ́ %(name)s mọ́."
+
+msgid "Groupe « %(name)s » créé !"
+msgstr "Ẹgbẹ́ « %(name)s » ni a dá!"
+
+msgid "Tu as rejoint le groupe « %(name)s »."
+msgstr "O ti dara pọ̀ mọ́ ẹgbẹ́ « %(name)s »."
+
+msgid "Tu as quitté le groupe « %(name)s »."
+msgstr "O ti jáde kúrò nínú ẹgbẹ́ « %(name)s »."
+
+msgid "Rejoins le groupe avant de pouvoir y publier."
+msgstr "Dara pọ̀ mọ́ ẹgbẹ́ kí o tó lè tẹ̀ jáde nínú rẹ̀."
+
+msgid "Publication ajoutée au groupe."
+msgstr "A ti fi ìtẹ̀jáde sí ẹgbẹ́."
+
+msgid "Ta publication est vide."
+msgstr "Ìtẹ̀jáde rẹ ṣófo."
+
+msgid "Page « %(name)s » créée !"
+msgstr "Ojú ìwé « %(name)s » ni a dá!"
+
+msgid "Tu suis maintenant la page « %(name)s »."
+msgstr "O ń tẹ̀lé ojú ìwé « %(name)s » nísinsìnyí."
+
+msgid "Tu ne suis plus la page « %(name)s »."
+msgstr "Ò ì ń tẹ̀lé ojú ìwé « %(name)s » mọ́."
+
+msgid "Seul le propriétaire peut publier sur sa page."
+msgstr "Onílú ojú ìwé nìkan ló lè tẹ̀ jáde lórí rẹ̀."
+
+msgid "Publication ajoutée à la page."
+msgstr "A ti fi ìtẹ̀jáde sí ojú ìwé."
+
+msgid "Publication partagée !"
+msgstr "Ìtẹ̀jáde tí a pín!"
+
+msgid "Commentaire ajouté."
+msgstr "A ti fi ẹ̀sọ̀ sílẹ̀."
+
+msgid "Ton commentaire est vide ou invalide."
+msgstr "Ẹ̀sọ̀ rẹ ṣófo tàbí kò tọ́."
+
+msgid "Tu ne peux pas supprimer ce commentaire."
+msgstr "O ò lè parẹ́ ẹ̀sọ̀ yìí."
+
+msgid "Commentaire supprimé."
+msgstr "A ti parẹ́ ẹ̀sọ̀."
+
+msgid "Impossible de te parler à toi-même."
+msgstr "Kò ṣeé ṣe láti bá ara rẹ sọ̀rọ̀."
+
+msgid "Tu ne peux envoyer un message qu'à tes amis."
+msgstr "O lè rán ìròyìn sí àwọn ọrẹ́ rẹ nìkan."
+
+# --- Chaînes avec variables (blocktrans) ---
+
+msgid "Quoi de neuf, {{ display_name }} ?"
+msgstr "Kí ló dé, {{ display_name }}?"
+
+msgid "Page {{ n }} / {{ total }}"
+msgstr "Ojú ìwé {{ n }} / {{ total }}"
+
+msgid "{{ counter }} ami"
+msgstr "ọrẹ́ {{ counter }}"
+
+msgid "{{ counter }} amis"
+msgstr "àwọn ọrẹ́ {{ counter }}"
+
+msgid "Aucun résultat pour « {{ q }} »."
+msgstr "Kò sí àbájáde fún « {{ q }} »."
+
+# --- Modèle Language (core) ---
+
+msgid "Code ISO"
+msgstr "Kóòdù ISO"
+
+msgid "Nom"
+msgstr "Orúkọ"
+
+msgid "Nom d’origine"
+msgstr "Orúkọ ìbílẹ̀"
+
+msgid "Active"
+msgstr "Ṣiṣẹ́"
+
+msgid "Interface traduite"
+msgstr "Èdè ojú ìwé ti wà"
+
+# --- Chaînes restantes : non traduites (retombent sur le français) ---
+
+msgid "Ajoute des amis pour les retrouver ici."
+msgstr ""
+
+msgid "Aucun abonné."
+msgstr ""
+
+msgid "Aucun commentaire pour l’instant. Sois le premier !"
+msgstr ""
+
+msgid "Aucun groupe pour l'instant."
+msgstr ""
+
+msgid "Aucun membre."
+msgstr ""
+
+msgid "Aucune conversation pour le moment."
+msgstr ""
+
+msgid "Aucune demande d’amitié en attente."
+msgstr ""
+
+msgid "Aucune notification pour le moment."
+msgstr ""
+
+msgid "Aucune page pour l'instant."
+msgstr ""
+
+msgid "Aucune publication dans ce groupe pour l'instant."
+msgstr ""
+
+msgid "Aucune publication pour le moment."
+msgstr ""
+
+msgid "Aucune publication sur cette page pour l'instant."
+msgstr ""
+
+msgid "Aucune suggestion pour le moment. Reviens plus tard !"
+msgstr ""
+
+msgid "Choisis les langues béninoises que tu parles, et la langue de l’interface."
+msgstr ""
+
+msgid "Crée la première !"
+msgstr ""
+
+msgid "Crée le premier !"
+msgstr ""
+
+msgid "Publication avec image uniquement."
+msgstr ""
+
+msgid "Rejoins le groupe pour publier et voir les publications."
+msgstr ""
+
+msgid "Rends-toi sur le profil d'un ami et clique sur « Message »."
+msgstr ""
+
+msgid "Tape un nom ou un pseudo pour chercher des personnes."
+msgstr ""
+
+msgid "Ton fil est vide pour l’instant. Ajoute des amis ou publie ton premier post !"
+msgstr ""
+
+msgid "Toutes les publications de la page seront également supprimées."
+msgstr ""
+
+msgid "Toutes les publications du groupe seront également supprimées."
+msgstr ""
+
+msgid "Code ISO 639-3 (ex. fon, yor)"
+msgstr ""
+
+msgid "Vrai si l'interface du site existe dans cette langue."
+msgstr ""

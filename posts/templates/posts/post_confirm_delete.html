@@ -1,26 +1,22 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Supprimer la publication{% endblock %}
+{% block title %}{% trans 'Supprimer la publication' %}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card shadow-sm">
-            <div class="card-body text-center">
-                <h3 class="mb-3">Supprimer cette publication ?</h3>
-                {% if post.content %}
-                    <p class="text-muted">« {{ post.content|truncatechars:120 }} »</p>
-                {% else %}
-                    <p class="text-muted">Publication avec image uniquement.</p>
-                {% endif %}
-                <p class="text-danger small">Cette action est irréversible.</p>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Oui, supprimer</button>
-                    <a href="{% url 'home' %}" class="btn btn-outline-secondary">Annuler</a>
-                </form>
-            </div>
-        </div>
-    </div>
+<div class="fb-card p-4 text-center" style="max-width:500px;margin:0 auto;">
+    <i class="bi bi-trash" style="font-size:3rem;color:#e41e3f;"></i>
+    <h3 class="mt-3 mb-3">{% trans 'Supprimer cette publication ?' %}</h3>
+    {% if post.content %}
+        <p class="text-muted">{% blocktrans with preview=post.content|truncatechars:120 %}« {{ preview }} »{% endblocktrans %}</p>
+    {% else %}
+        <p class="text-muted">{% trans 'Publication avec image uniquement.' %}</p>
+    {% endif %}
+    <p class="text-danger small">{% trans 'Cette action est irréversible.' %}</p>
+    <form method="post" class="d-flex gap-2 justify-content-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-fb-danger"><i class="bi bi-trash me-1"></i>{% trans 'Oui, supprimer' %}</button>
+        <a href="{% url 'home' %}" class="btn btn-fb-secondary">{% trans 'Annuler' %}</a>
+    </form>
 </div>
 {% endblock %}

@@ -1,41 +1,46 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ page.name }}{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm mb-3">
-    <div class="card-body">
-        <div class="d-flex align-items-center gap-3">
+{# ============ En-tête de la page ============ #}
+<div class="fb-profile-card">
+    <div class="p-4">
+        <div class="d-flex flex-wrap align-items-center gap-3">
             {% if page.image %}
-                <img src="{{ page.image.url }}" alt="{{ page.name }}" class="rounded" width="80" height="80" style="object-fit:cover;">
+                <img src="{{ page.image.url }}" alt="{{ page.name }}" class="rounded-circle" width="80" height="80" style="object-fit:cover;">
             {% else %}
-                <i class="bi bi-file-earmark-post text-primary" style="font-size:4rem;"></i>
+                <i class="bi bi-file-earmark-post" style="font-size:4rem;color:#b0b3b8;"></i>
             {% endif %}
+
             <div class="flex-grow-1">
                 <h3 class="mb-0">{{ page.name }}</h3>
                 {% if page.description %}
                     <p class="text-muted mb-1">{{ page.description }}</p>
                 {% endif %}
                 <small class="text-muted">
-                    <i class="bi bi-person-heart"></i> {{ page.follower_count }} abonné{{ page.follower_count|pluralize }}
-                    · gérée par {{ page.owner.username }}
+                    <i class="bi bi-person-heart"></i>
+                    {% blocktrans count counter=page.follower_count %}{{ counter }} abonné{% plural %}{{ counter }} abonnés{% endblocktrans %}
+                    · {% blocktrans with owner=page.owner.username %}gérée par {{ owner }}{% endblocktrans %}
                 </small>
             </div>
-            <div class="d-flex flex-column gap-2">
+
+            <div class="d-flex gap-2 flex-wrap justify-content-end pb-2">
                 {% if is_follower %}
                     <form method="post" action="{% url 'page_unfollow' page.pk %}">
                         {% csrf_token %}
-                        <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-person-dash"></i> Ne plus suivre</button>
+                        <button class="btn btn-fb-secondary btn-sm"><i class="bi bi-person-dash"></i> {% trans 'Ne plus suivre' %}</button>
                     </form>
                 {% else %}
                     <form method="post" action="{% url 'page_follow' page.pk %}">
                         {% csrf_token %}
-                        <button class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Suivre</button>
+                        <button class="btn btn-fb-primary btn-sm"><i class="bi bi-person-plus"></i> {% trans 'Suivre' %}</button>
                     </form>
                 {% endif %}
                 {% if page.owner == user %}
-                    <a href="{% url 'page_update' page.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i> Modifier</a>
-                    <a href="{% url 'page_delete' page.pk %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Supprimer</a>
+                    <a href="{% url 'page_update' page.pk %}" class="btn btn-fb-secondary btn-sm"><i class="bi bi-pencil"></i> {% trans 'Modifier' %}</a>
+                    <a href="{% url 'page_delete' page.pk %}" class="btn btn-fb-danger btn-sm"><i class="bi bi-trash"></i> {% trans 'Supprimer' %}</a>
                 {% endif %}
             </div>
         </div>
@@ -43,75 +48,89 @@
 </div>
 
 <div class="row g-3">
+    {# ============ Colonne centrale : publications ============ #}
     <div class="col-lg-8">
         {% if page.owner == user %}
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <form method="post" action="{% url 'page_post_create' page.pk %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-2">
-                        <textarea name="content" class="form-control" rows="2" placeholder="Publier sur « {{ page.name }} »…"></textarea>
-                    </div>
-                    <div class="mb-2">
-                        <input type="file" name="image" class="form-control" accept="image/*">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i> Publier</button>
-                </form>
+        <div class="fb-composer-card">
+            <div class="fb-composer">
+                {% if request.user.profile.avatar %}
+                    <img class="rounded-circle" src="{{ request.user.profile.avatar.url }}" width="40" height="40" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+                {% else %}
+                    <i class="bi bi-person-circle" style="font-size:2.5rem;color:#b0b3b8;"></i>
+                {% endif %}
+                <span class="fb-composer-pill">{% blocktrans with page_name=page.name %}Publier sur « {{ page_name }} »…{% endblocktrans %}</span>
             </div>
+            <form method="post" action="{% url 'page_post_create' page.pk %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="px-3 pb-2">
+                    <textarea name="content" class="form-control" rows="2" placeholder="{% blocktrans with page_name=page.name %}Publier sur « {{ page_name }} »…{% endblocktrans %}"></textarea>
+                </div>
+                <div class="fb-composer-footer">
+                    <label class="fb-composer-btn" for="id_image" style="cursor:pointer;">
+                        <i class="bi bi-images text-success"></i> {% trans 'Photo' %}
+                    </label>
+                    <button type="submit" class="fb-composer-btn" style="cursor:pointer;">
+                        <i class="bi bi-send text-primary"></i> {% trans 'Publier' %}
+                    </button>
+                </div>
+                <div class="d-none"><input type="file" id="id_image" name="image" class="form-control" accept="image/*"></div>
+            </form>
         </div>
         {% endif %}
 
         {% for p in page.posts.all %}
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    {% if p.author.profile.avatar %}
-                        <img src="{{ p.author.profile.avatar.url }}" class="rounded-circle" width="36" height="36" style="object-fit:cover;" alt="Avatar">
-                    {% else %}
-                        <i class="bi bi-person-circle text-muted" style="font-size:2rem;"></i>
-                    {% endif %}
-                    <div>
-                        <a href="{% url 'profile' p.author.username %}" class="fw-bold text-decoration-none text-dark small">
-                            {{ p.author.get_full_name|default:p.author.username }}
-                        </a>
-                        <div class="text-muted small">{{ p.created_at|timesince }}</div>
+        <article class="fb-post-card">
+            <header class="fb-post-header">
+                {% if p.author.profile.avatar %}
+                    <a href="{% url 'profile' p.author.username %}">
+                        <img class="rounded-circle" src="{{ p.author.profile.avatar.url }}" width="40" height="40" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+                    </a>
+                {% else %}
+                    <i class="bi bi-person-circle text-muted" style="font-size:2.5rem;"></i>
+                {% endif %}
+                <div class="flex-grow-1">
+                    <a href="{% url 'profile' p.author.username %}" class="fw-semibold text-decoration-none text-dark">
+                        {{ p.author.get_full_name|default:p.author.username }}
+                    </a>
+                    <div class="text-muted small d-flex align-items-center gap-1">
+                        {{ p.created_at|timesince }} · <i class="bi bi-globe-europe-africa"></i>
                     </div>
                 </div>
+            </header>
+            <div class="fb-post-body">
                 {% if p.content %}
-                    <p class="mb-2">{{ p.content|linebreaksbr }}</p>
+                    <p class="fb-post-text">{{ p.content|linebreaksbr }}</p>
                 {% endif %}
                 {% if p.image %}
-                    <img src="{{ p.image.url }}" class="img-fluid rounded" alt="Image">
+                    <img src="{{ p.image.url }}" class="fb-post-img rounded-2 mb-1" alt="{% trans 'Image de la publication' %}">
                 {% endif %}
             </div>
-        </div>
+        </article>
         {% empty %}
-        <div class="card shadow-sm">
-            <div class="card-body text-center text-muted">
-                Aucune publication sur cette page pour l'instant.
-            </div>
+        <div class="fb-empty">
+            <i class="bi bi-file-earmark-text" style="font-size:3rem;color:#b0b3b8;"></i>
+            <p class="mt-3 mb-0">{% trans 'Aucune publication sur cette page pour l\'instant.' %}</p>
         </div>
         {% endfor %}
     </div>
 
+    {# ============ Colonne latérale : abonnés ============ #}
     <div class="col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-header"><i class="bi bi-person-heart"></i> Abonnés ({{ page.follower_count }})</div>
-            <ul class="list-group list-group-flush">
-                {% for f in page.followers.all %}
-                <li class="list-group-item d-flex align-items-center gap-2">
-                    {% if f.profile.avatar %}
-                        <img src="{{ f.profile.avatar.url }}" class="rounded-circle" width="28" height="28" style="object-fit:cover;" alt="Avatar">
-                    {% else %}
-                        <i class="bi bi-person-circle text-muted" style="font-size:1.5rem;"></i>
-                    {% endif %}
-                    <a href="{% url 'profile' f.username %}" class="text-decoration-none small">{{ f.get_full_name|default:f.username }}</a>
-                </li>
-                {% empty %}
-                <li class="list-group-item text-muted small">Aucun abonné.</li>
-                {% endfor %}
-            </ul>
+        <h6 class="fb-section-title px-2"><i class="bi bi-person-heart"></i> {% blocktrans with count=page.follower_count %}Abonnés ({{ count }}){% endblocktrans %}</h6>
+        {% for f in page.followers.all %}
+        <div class="fb-list-group-row">
+            {% if f.profile.avatar %}
+                <img src="{{ f.profile.avatar.url }}" class="rounded-circle" width="28" height="28" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+            {% else %}
+                <i class="bi bi-person-circle text-muted" style="font-size:1.5rem;"></i>
+            {% endif %}
+            <a href="{% url 'profile' f.username %}" class="text-decoration-none small flex-grow-1">{{ f.get_full_name|default:f.username }}</a>
         </div>
+        {% empty %}
+        <div class="fb-empty">
+            <p class="mb-0">{% trans 'Aucun abonné.' %}</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

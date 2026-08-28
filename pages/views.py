@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
@@ -52,7 +53,7 @@ class PageCreateView(LoginRequiredMixin, CreateView):
         form.instance.owner = self.request.user
         response = super().form_valid(form)
         self.object.followers.add(self.request.user)
-        messages.success(self.request, f'Page « {self.object.name} » créée !')
+        messages.success(self.request, _('Page « %(name)s » créée !') % {'name': self.object.name})
         return response
 
     def get_success_url(self):
@@ -86,7 +87,7 @@ class FollowPageView(LoginRequiredMixin, View):
     def post(self, request, pk):
         page = get_object_or_404(Page, pk=pk)
         page.followers.add(request.user)
-        messages.success(request, f'Tu suis maintenant la page « {page.name} ».')
+        messages.success(request, _('Tu suis maintenant la page « %(name)s ».') % {'name': page.name})
         return redirect(page.get_absolute_url())
 
 
@@ -96,7 +97,7 @@ class UnfollowPageView(LoginRequiredMixin, View):
     def post(self, request, pk):
         page = get_object_or_404(Page, pk=pk)
         page.followers.remove(request.user)
-        messages.info(request, f'Tu ne suis plus la page « {page.name} ».')
+        messages.info(request, _('Tu ne suis plus la page « %(name)s ».') % {'name': page.name})
         return redirect(page.get_absolute_url())
 
 
@@ -106,13 +107,13 @@ class PagePostCreateView(LoginRequiredMixin, View):
     def post(self, request, pk):
         page = get_object_or_404(Page, pk=pk)
         if page.owner != request.user:
-            messages.error(request, 'Seul le propriétaire peut publier sur sa page.')
+            messages.error(request, _('Seul le propriétaire peut publier sur sa page.'))
             return redirect(page.get_absolute_url())
         content = request.POST.get('content', '').strip()
         image = request.FILES.get('image')
         if content or image:
             PagePost.objects.create(page=page, author=request.user, content=content, image=image)
-            messages.success(request, 'Publication ajoutée à la page.')
+            messages.success(request, _('Publication ajoutée à la page.'))
         else:
-            messages.error(request, 'Ta publication est vide.')
+            messages.error(request, _('Ta publication est vide.'))
         return redirect(page.get_absolute_url())

@@ -1,49 +1,92 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Accueil{% endblock %}
+{% block title %}{% trans 'Accueil' %}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <form method="post" action="{% url 'post_create' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {% include '_form_fields.html' with form=post_form %}
-                    <button type="submit" class="btn btn-primary w-100 mt-2">
-                        <i class="bi bi-send"></i> Publier
-                    </button>
-                </form>
-            </div>
+{# ============ Rangée « Stories » (décorative, depuis les contacts) ============ #}
+{% if contacts %}
+<div class="fb-stories">
+    <a href="{% url 'edit_profile' request.user.username %}" class="fb-story text-decoration-none">
+        <div class="h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,var(--cream-dark),var(--warm-grey-light));">
+            <i class="bi bi-plus-circle-fill" style="font-size:2rem;color:var(--gold);"></i>
         </div>
-
-        {% for post in posts %}
-            {% include 'posts/_post_card.html' %}
-        {% empty %}
-            <div class="card shadow-sm">
-                <div class="card-body text-center text-muted py-5">
-                    <i class="bi bi-newspaper display-3"></i>
-                    <p class="mt-3 mb-0">
-                        Ton fil est vide pour l'instant.<br>
-                        Ajoute des amis ou publie ton premier post !
-                    </p>
-                </div>
+        <div class="fb-story-name">{% trans 'Créer une story' %}</div>
+    </a>
+    {% for c in contacts|slice:':7' %}
+        <a href="{% url 'profile' c.username %}" class="fb-story text-decoration-none">
+            <div class="h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,var(--gold),var(--terracotta));">
+                {% if c.profile.avatar %}
+                    <img class="rounded-circle border border-3 border-white" src="{{ c.profile.avatar.url }}" width="64" height="64" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+                {% else %}
+                    <i class="bi bi-person-circle text-white" style="font-size:3rem;"></i>
+                {% endif %}
             </div>
-        {% endfor %}
-
-        {% if is_paginated %}
-        <nav class="mt-3">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>
-                {% endif %}
-                <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
-                {% if page_obj.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
-    </div>
+            <div class="fb-story-name text-truncate">{{ c.get_full_name|default:c.username }}</div>
+        </a>
+    {% endfor %}
 </div>
+{% endif %}
+
+{# ============ Composer ============ #}
+{% with display_name=request.user.first_name|default:request.user.username %}
+<div class="fb-composer-card">
+    <div class="fb-composer">
+        {% if request.user.profile.avatar %}
+            <img class="rounded-circle" src="{{ request.user.profile.avatar.url }}" width="40" height="40" style="object-fit:cover;" alt="{% trans 'Avatar' %}">
+        {% else %}
+            <i class="bi bi-person-circle" style="font-size:2.5rem;color:#b0b3b8;"></i>
+        {% endif %}
+        <span class="fb-composer-pill">{% blocktrans %}Quoi de neuf, {{ display_name }} ?{% endblocktrans %}</span>
+    </div>
+    <form method="post" action="{% url 'post_create' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="px-3 pb-2">
+            {{ post_form.content }}
+            {% for error in post_form.content.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="fb-composer-footer">
+            <label class="fb-composer-btn" for="id_image" style="cursor:pointer;">
+                <i class="bi bi-images text-success"></i> {% trans 'Photo' %}
+            </label>
+            <button type="submit" class="fb-composer-btn" style="cursor:pointer;">
+                <i class="bi bi-send text-primary"></i> {% trans 'Publier' %}
+            </button>
+        </div>
+        <div class="d-none">{{ post_form.image }}</div>
+    </form>
+</div>
+{% endwith %}
+
+{# ============ Fil d'actualité ============ #}
+{% for post in posts %}
+    {% include 'posts/_post_card.html' %}
+{% empty %}
+    <div class="fb-empty">
+        <i class="bi bi-newspaper" style="font-size:3rem;color:#C4AF98;"></i>
+        <p class="mt-3 mb-0">
+            {% trans 'Ton fil est vide pour l’instant. Ajoute des amis ou publie ton premier post !' %}
+        </p>
+    </div>
+{% endfor %}
+
+{# Infinite scroll sentinel #}
+<div id="infinite-sentinel" style="height:1px;"></div>
+<div id="feed-container"></div>
+
+{% if is_paginated %}
+<nav class="mt-3 fb-pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans 'Précédent' %}</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">{% blocktrans with n=page_obj.number total=page_obj.paginator.num_pages %}Page {{ n }} / {{ total }}{% endblocktrans %}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans 'Suivant' %}</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
 {% endblock %}

@@ -30,6 +30,22 @@ class Profile(models.Model):
     bio = models.TextField(max_length=500, blank=True, verbose_name='Biographie')
     birth_date = models.DateField(null=True, blank=True, verbose_name='Date de naissance')
     location = models.CharField(max_length=100, blank=True, verbose_name='Localisation')
+    languages = models.ManyToManyField(
+        'core.Language',
+        related_name='speakers',
+        blank=True,
+        verbose_name='Langues parlées',
+        help_text='Langues béninoises que tu parles (Fon, Yoruba, Adja…).',
+    )
+    ui_language = models.ForeignKey(
+        'core.Language',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+        verbose_name='Langue de l’interface',
+        help_text='Langue utilisée pour afficher le site (vide = français).',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
