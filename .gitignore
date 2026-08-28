@@ -11,7 +11,9 @@ db.sqlite3
 db.sqlite3-journal
 /staticfiles/
 /media/
-/static/
+
+# Traductions compilées (générées par tools/compile_i18n.py)
+locale/**/LC_MESSAGES/*.mo
 
 # IDE / OS
 .idea/
