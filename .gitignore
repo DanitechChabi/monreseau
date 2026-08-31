@@ -21,3 +21,4 @@ locale/**/LC_MESSAGES/*.mo
 *.swp
 .DS_Store
 Thumbs.db
+.claude/
