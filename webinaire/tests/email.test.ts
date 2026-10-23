@@ -18,7 +18,8 @@ describe("e-mail de confirmation", () => {
     const { subject, html, text } = render();
     expect(subject).toBe("Confirmation de votre inscription au webinaire");
     expect(html).toContain("Confirmer mon adresse");
-    expect(html).toContain("Archivexa &middot; Docflow");
+    expect(html).toContain("ARCHIVEXA&nbsp;&nbsp;·&nbsp;&nbsp;DOCFLOW");
+    expect(text).toContain("Archivexa (Bénin), Docflow (Niger) et RMBI (Bénin)");
     for (const name of ["Ousmane Abdou", "Roguy Abadassi", "Daniel Chabi Bouko"]) {
       expect(html).toContain(name);
       expect(text).toContain(name);
@@ -42,7 +43,7 @@ describe("e-mail de confirmation", () => {
 
   it("avec date, lien et contact renseignés : tout apparaît", () => {
     const { text } = render({ date: "2026-12-03", time: "10:00", joinUrl: "https://meet.example/x", contactEmail: "contact@example.org" });
-    expect(text).toContain("Date : jeudi 3 décembre 2026");
+    expect(text).toContain("Date : Jeudi 3 décembre 2026");
     expect(text).toContain("Heure : 10 h 00 (heure du Bénin et du Niger)");
     expect(text).toContain("https://meet.example/x");
     expect(text).not.toContain("vous sera envoyé par e-mail avant");

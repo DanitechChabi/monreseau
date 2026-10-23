@@ -270,7 +270,7 @@ describe("administration", () => {
     const sent = await body(await handleAdminAnnounce(post("admin-announce", {}, auth), deps));
     expect(sent).toMatchObject({ status: "done", sent: 1, failed: 0 });
     const details = mailer.sent.at(-1)!;
-    expect(details.text).toContain("jeudi 3 décembre 2026");
+    expect(details.text).toContain("Jeudi 3 décembre 2026");
     expect(details.text).toContain("10 h 00 (heure du Bénin et du Niger)");
     expect(details.text).toContain("Le lien de connexion vous sera envoyé par e-mail avant le webinaire.");
 
