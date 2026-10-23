@@ -20,7 +20,7 @@ Tout se règle dans `src/config/event.ts`. Une valeur à `null` n'est jamais aff
 | `qaDurationMinutes` | Durée affichée pour les questions-réponses |
 | `contactEmail` | Contact dans le pied de page |
 | `joinUrl` | Lien de connexion (destiné à l'e-mail d'inscription, non affiché) |
-| `organizers[].logo` | Logo à la place du nom (déposer le SVG dans `public/logos/`) |
+| `organizers[].logo` | Logo affiché dans la section Organisateurs (fichier dans `public/logos/`, avec ses dimensions) |
 | `speakers[].portrait` | Portrait à la place des initiales |
 
 Le formulaire d'inscription n'envoie rien (passe 1) : le branchement backend

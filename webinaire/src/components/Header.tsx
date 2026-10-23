@@ -10,9 +10,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-forest-line/70 bg-forest">
       <div className="container-page flex h-16 items-center justify-between gap-4">
-        <a href="#top" className="flex min-w-0 items-baseline gap-2 font-display text-body font-semibold text-paper">
+        <a href="#top" className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 font-display text-small font-semibold text-paper sm:gap-x-2 sm:text-body">
           {event.organizers.map((o, i) => (
-            <span key={o.name} className="flex items-baseline gap-2">
+            <span key={o.name} className="flex items-baseline gap-1.5 whitespace-nowrap sm:gap-2">
               {i > 0 && (
                 <span aria-hidden="true" className="text-emeraude">
                   ·

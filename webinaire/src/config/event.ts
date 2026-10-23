@@ -9,8 +9,14 @@
 export type Organizer = {
   name: string;
   country: string;
-  /** Chemin public du logo, ex. "/logos/archivexa.svg". `null` → nom affiché en texte. */
-  logo: string | null;
+  /** Logo fourni par l'organisation (dans public/logos/). `null` → nom affiché en texte. */
+  logo: {
+    src: string;
+    width: number;
+    height: number;
+    /** Le logo contient déjà le nom écrit : on ne le répète pas à côté. */
+    includesName: boolean;
+  } | null;
 };
 
 export type Speaker = {
@@ -75,9 +81,22 @@ export const event: EventConfig = {
   contactEmail: null,
   registrationEndpoint: null,
   organizers: [
-    // Déposer les fichiers dans public/logos/ puis renseigner le chemin.
-    { name: "Archivexa", country: "Bénin", logo: null },
-    { name: "Docflow", country: "Niger", logo: null },
+    // Déposer les fichiers dans public/logos/ puis renseigner le chemin et les dimensions (px).
+    {
+      name: "Archivexa",
+      country: "Bénin",
+      logo: { src: "/logos/archivexa.png", width: 256, height: 256, includesName: false },
+    },
+    {
+      name: "Docflow",
+      country: "Niger",
+      logo: { src: "/logos/docflow.png", width: 256, height: 256, includesName: false },
+    },
+    {
+      name: "RMBI",
+      country: "Bénin",
+      logo: { src: "/logos/rmbi.png", width: 194, height: 64, includesName: true },
+    },
   ],
   speakers: [
     { id: "ousmane", name: "Ousmane Abdou", portrait: null },
