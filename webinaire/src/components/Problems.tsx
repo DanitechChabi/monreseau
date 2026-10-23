@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
-import { Reveal } from "./Reveal";
+import { useRef, type ReactNode } from "react";
+import { EASE_OUT, gsap, MQ, useGSAP } from "../motion/gsap";
 import { SectionHeading } from "./SectionHeading";
+import { TiltCard } from "./TiltCard";
 
 const icon = (d: ReactNode) => (
   <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -28,22 +29,63 @@ const problems = [
 ];
 
 export function Problems() {
+  const root = useRef<HTMLElement>(null);
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(MQ.motion, () => {
+        // Cartes : arrivée en cascade avec basculement 3D.
+        gsap.from("[data-problem]", {
+          y: 70,
+          rotateX: -18,
+          opacity: 0,
+          transformPerspective: 900,
+          transformOrigin: "50% 100%",
+          duration: 1.1,
+          ease: EASE_OUT,
+          stagger: 0.12,
+          scrollTrigger: { trigger: "[data-problems]", start: "top 80%", once: true },
+        });
+        // Pictogrammes tracés trait par trait.
+        const strokes = gsap.utils.toArray<SVGGeometryElement>("[data-problem] svg :is(path, circle, rect)");
+        strokes.forEach((el) => {
+          const len = el.getTotalLength();
+          gsap.set(el, { strokeDasharray: len, strokeDashoffset: len });
+        });
+        gsap.to(strokes, {
+          strokeDashoffset: 0,
+          duration: 1.4,
+          ease: "power2.inOut",
+          stagger: 0.05,
+          delay: 0.35,
+          scrollTrigger: { trigger: "[data-problems]", start: "top 80%", once: true },
+        });
+      });
+      return () => mm.revert();
+    },
+    { scope: root },
+  );
+
   return (
-    <section aria-labelledby="problemes-title" className="on-light py-20 md:py-28">
+    <section ref={root} aria-labelledby="problemes-title" className="on-light py-20 md:py-28">
       <div className="container-page">
         <SectionHeading
           id="problemes-title"
           eyebrow="Le constat"
           title={"Ces situations vous parlent-elles\u00A0?"}
         />
-        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {problems.map((p, i) => (
-            <Reveal as="li" key={p.text} delay={i * 0.06} className="flex flex-col gap-5 rounded-2xl border border-line bg-white p-6">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emeraude-soft text-forest">
-                {p.icon}
-              </span>
-              <p className="text-body font-medium text-ink">{p.text}</p>
-            </Reveal>
+        <ul data-problems className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {problems.map((p) => (
+            <li key={p.text} data-problem className="h-full">
+              <TiltCard className="h-full rounded-2xl">
+                <div className="flex h-full flex-col gap-5 rounded-2xl border border-line bg-white p-6 shadow-[0_1px_0_rgba(7,59,50,0.04),0_18px_40px_-28px_rgba(7,59,50,0.35)]">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emeraude-soft text-forest">
+                    {p.icon}
+                  </span>
+                  <p className="text-body font-medium text-ink">{p.text}</p>
+                </div>
+              </TiltCard>
+            </li>
           ))}
         </ul>
       </div>

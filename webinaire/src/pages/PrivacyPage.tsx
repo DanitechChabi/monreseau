@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { organizerNames } from "../config/event";
+import { PHOTOS } from "../config/photos";
 import { useEvent } from "../hooks/useEvent";
 import { PageShell } from "./PageShell";
 
@@ -69,6 +70,28 @@ export function PrivacyPage() {
             Vos données d'inscription sont conservées {months} mois après votre inscription, puis supprimées.
           </p>
         </Block>
+
+        <section id="credits" className="mt-10 scroll-mt-24">
+          <h2 className="text-h3 text-forest">Crédits photographiques</h2>
+          <p className="mt-3 text-body text-ink">
+            Photographies issues de Wikimedia Commons, recadrées et redimensionnées pour ce site ; les versions adaptées
+            sont diffusées sous la même licence.
+          </p>
+          <ul className="mt-3 space-y-2 text-small text-ink">
+            {Object.values(PHOTOS).map((p) => (
+              <li key={p.source}>
+                {p.caption} — photo{" "}
+                <a href={p.source} className="font-semibold text-forest underline underline-offset-2" rel="noopener">
+                  {p.author}
+                </a>
+                ,{" "}
+                <a href={p.licenseUrl} className="text-forest underline underline-offset-2" rel="noopener license">
+                  {p.license}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <Block title="Vos droits">
           <p>

@@ -9,6 +9,10 @@ export function Footer() {
           <p className="font-display text-h3 text-paper">{event.organizers.map((o) => o.name).join(" · ")}</p>
           <p className="eyebrow mt-2 text-emeraude">{event.tagline}</p>
         </div>
+        <div className="flex flex-col gap-2 md:items-end">
+        <a href="/confidentialite#credits" className="text-small text-mist underline underline-offset-4 hover:text-paper">
+          Confidentialité et crédits photos
+        </a>
         {event.contactEmail && (
           <p className="text-small">
             Contact :{" "}
@@ -17,6 +21,7 @@ export function Footer() {
             </a>
           </p>
         )}
+        </div>
       </div>
     </footer>
   );

@@ -96,3 +96,151 @@
   text-transform: uppercase;
   font-weight: 600;
 }
+
+/* ---------- Séquence « Du désordre à l'ordre » ----------
+   Par défaut (mobile, animations réduites, sans JS) : deux photos en grille.
+   .is-sequenced (grand écran, ajouté par GSAP) : scène plein écran épinglée. */
+@layer components {
+  .chaos-stage {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding: 0 1.25rem 5rem;
+  }
+  @media (width >= 48rem) {
+    .chaos-stage {
+      grid-template-columns: 1fr 1fr;
+      padding: 0 2rem 7rem;
+    }
+  }
+  .chaos-panel {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    aspect-ratio: 4 / 5;
+    background: var(--color-forest);
+  }
+  .chaos-media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .chaos-media > div {
+    will-change: transform;
+  }
+  .chaos-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(4, 38, 31, 0.94) 0%, rgba(4, 38, 31, 0.55) 38%, rgba(4, 38, 31, 0) 65%);
+  }
+  .chaos-text {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 3.75rem;
+  }
+  .chaos-credit {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 0.9rem;
+  }
+  .chaos-front,
+  .chaos-progress {
+    display: none;
+  }
+
+  .chaos-stage.is-sequenced {
+    display: block;
+    max-width: none;
+    height: 100dvh;
+    padding: 0;
+    overflow: hidden;
+  }
+  .is-sequenced .chaos-panel {
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+  .is-sequenced .chaos-shade {
+    background:
+      linear-gradient(90deg, rgba(4, 38, 31, 0.9) 0%, rgba(4, 38, 31, 0.55) 40%, rgba(4, 38, 31, 0.05) 75%),
+      linear-gradient(0deg, rgba(4, 38, 31, 0.7) 0%, rgba(4, 38, 31, 0) 40%);
+  }
+  .is-sequenced .chaos-text {
+    left: max(2rem, calc((100vw - 76rem) / 2 + 2rem));
+    right: auto;
+    bottom: 22%;
+  }
+  .is-sequenced .chaos-credit {
+    left: auto;
+    right: 2rem;
+    bottom: 1.25rem;
+    text-align: right;
+  }
+  .is-sequenced .chaos-front {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    width: 2px;
+    background: var(--color-emeraude);
+    box-shadow: 0 0 24px 4px rgba(16, 185, 129, 0.45);
+  }
+  .chaos-front-label {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    border-radius: 999px;
+    background: var(--color-emeraude);
+    padding: 0.45rem 0.9rem;
+    font-size: var(--text-small);
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .is-sequenced ~ .chaos-progress,
+  .is-sequenced .chaos-progress {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: rgba(248, 250, 247, 0.12);
+  }
+}
+
+/* Lignes découpées par SplitText : pas de débordement visible pendant le masque. */
+.split-line {
+  padding-bottom: 0.06em;
+}
+
+/* ---------- Programme : étape courante ---------- */
+@layer components {
+  .step-portrait {
+    transition: transform 0.6s var(--ease-out-soft), box-shadow 0.6s var(--ease-out-soft);
+  }
+  .step:has(.is-active) .step-portrait {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--color-emeraude), 0 18px 30px -12px rgba(7, 59, 50, 0.45);
+  }
+  .step-num {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 7vw, 6.5rem);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(221, 229, 223, 0.7);
+    transition: -webkit-text-stroke-color 0.6s;
+  }
+  .step:has(.is-active) .step-num {
+    -webkit-text-stroke-color: rgba(16, 185, 129, 0.4);
+  }
+}
