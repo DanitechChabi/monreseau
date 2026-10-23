@@ -22,7 +22,7 @@ export type Organizer = {
 export type Speaker = {
   id: string;
   name: string;
-  /** Chemin public d'un portrait réel. `null` → initiales. */
+  /** Chemin public d'un portrait réel (carré, dans public/speakers/). `null` → initiales. */
   portrait: string | null;
 };
 
@@ -99,7 +99,7 @@ export const event: EventConfig = {
     },
   ],
   speakers: [
-    { id: "ousmane", name: "Ousmane Abdou", portrait: null },
+    { id: "ousmane", name: "Ousmane Abdou", portrait: "/speakers/ousmane-abdou.jpg" },
     { id: "roguy", name: "Roguy", portrait: null },
     { id: "daniel", name: "Daniel", portrait: null },
   ],

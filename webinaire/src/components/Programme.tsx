@@ -15,7 +15,18 @@ function initials(name: string) {
 
 function Portrait({ speaker }: { speaker: Speaker }) {
   if (speaker.portrait) {
-    return <img src={speaker.portrait} alt={`Portrait de ${speaker.name}`} className="h-14 w-14 rounded-full object-cover" />;
+    // Le nom figure juste à côté : l'image est décorative pour les lecteurs d'écran.
+    return (
+      <img
+        src={speaker.portrait}
+        alt=""
+        width={56}
+        height={56}
+        loading="lazy"
+        decoding="async"
+        className="h-14 w-14 rounded-full border border-line bg-emeraude-soft object-cover"
+      />
+    );
   }
   return (
     <span
