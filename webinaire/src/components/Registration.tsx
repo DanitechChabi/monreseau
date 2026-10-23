@@ -1,4 +1,5 @@
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { organizerNames } from "../config/event";
 import { useEvent } from "../hooks/useEvent";
 import { backendConfigured, callFunction } from "../lib/backend";
@@ -9,13 +10,16 @@ import {
 } from "../../supabase/functions/_shared/validation.ts";
 import { ConsentCheck, CountryPicker } from "./form/Choices";
 import { EmailIcon, JobIcon, NameIcon, OrgIcon, PhoneIcon } from "./form/FieldIcons";
-import { Animated, type Entrance, FloatingInput } from "./form/FieldTile";
+import { FloatingInput } from "./form/FieldTile";
+import { cascadeItem, type StepEffect, StepProgress, StepStage } from "./form/Stepper";
 import { SubmitButton } from "./form/SubmitButton";
 import { ResendConfirmation } from "./ResendConfirmation";
 import { SectionHeading } from "./SectionHeading";
 
 /**
- * Formulaire d'inscription, branché sur la fonction `register`.
+ * Formulaire d'inscription pas à pas (une question par écran), branché sur la
+ * fonction `register`. Chaque étape a sa propre transition ; la dernière
+ * récapitule les réponses avant l'envoi.
  * Tant que VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY ne sont pas renseignées,
  * il reste fermé et n'envoie rien.
  */
@@ -35,6 +39,63 @@ const EMPTY: Values = {
 };
 const ORDER: Field[] = ["full_name", "email", "organisation", "job_title", "country", "phone"];
 
+type Step = { field: Field | null; effect: StepEffect; label: string; question: string; help: string };
+
+const STEPS: Step[] = [
+  {
+    field: "full_name",
+    effect: "blurRise",
+    label: "Nom et prénom",
+    question: "Comment vous appelez-vous ?",
+    help: "Votre nom et votre prénom, tels qu'ils figureront sur votre inscription.",
+  },
+  {
+    field: "email",
+    effect: "slide",
+    label: "E-mail",
+    question: "À quelle adresse vous écrire ?",
+    help: "Vous y recevrez la confirmation, puis le lien de connexion au webinaire.",
+  },
+  {
+    field: "organisation",
+    effect: "flip",
+    label: "Organisation",
+    question: "Pour quelle organisation travaillez-vous ?",
+    help: "Administration, entreprise, association, établissement…",
+  },
+  {
+    field: "job_title",
+    effect: "zoom",
+    label: "Fonction",
+    question: "Quelle est votre fonction ?",
+    help: "Par exemple : archiviste, secrétaire, responsable administratif…",
+  },
+  {
+    field: "country",
+    effect: "cascade",
+    label: "Pays",
+    question: "Dans quel pays êtes-vous ?",
+    help: "Des exemples du Bénin et du Niger seront présentés.",
+  },
+  {
+    field: "phone",
+    effect: "wipe",
+    label: "Téléphone",
+    question: "Un numéro pour vous joindre ?",
+    help: "Facultatif : uniquement en cas de besoin lié au webinaire.",
+  },
+  {
+    field: null,
+    effect: "stack",
+    label: "Vérification",
+    question: "Vérifiez vos informations",
+    help: "Vous pouvez modifier chaque réponse avant d'envoyer.",
+  },
+];
+const LAST = STEPS.length - 1;
+const COUNTRY_LABEL: Record<string, string> = { BJ: "Bénin", NE: "Niger", other: "Autre" };
+const PREFIX: Record<string, string> = { BJ: "+229 ", NE: "+227 " };
+
 type Outcome =
   | { kind: "idle" }
   | { kind: "submitting" }
@@ -52,19 +113,24 @@ function clientErrors(v: Values): FieldErrors {
 
 export function Registration() {
   const event = useEvent();
+  const reduce = useReducedMotion();
   const [values, setValues] = useState<Values>(EMPTY);
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
-  const [submitted, setSubmitted] = useState(false);
   const [serverErrors, setServerErrors] = useState<FieldErrors>({});
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
-  const [attempt, setAttempt] = useState(0);
+  const [step, setStep] = useState(0);
+  const [reached, setReached] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [shake, setShake] = useState(0);
+  const [navigated, setNavigated] = useState(false);
   const [resendEmail, setResendEmail] = useState<{ email: string; nonce: number } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
 
   const errors: FieldErrors = { ...clientErrors(values), ...serverErrors };
-  const visibleError = (f: Field) => (touched[f] || submitted ? errors[f] : undefined);
+  const visibleError = (f: Field) => (touched[f] ? errors[f] : undefined);
   const busy = outcome.kind === "submitting";
+  const current = STEPS[step]!;
 
   const update = (f: keyof Values, value: string | boolean) => {
     setValues((v) => ({ ...v, [f]: value }));
@@ -77,6 +143,51 @@ export function Registration() {
     if (outcome.kind !== "submitting") setOutcome({ kind: "idle" });
   };
 
+  // Après chaque changement d'étape, le focus va au champ de la nouvelle question
+  // (jamais au chargement de la page, pour ne pas faire défiler jusqu'au formulaire).
+  useEffect(() => {
+    if (!navigated) return;
+    const id = window.setTimeout(
+      () => {
+        const root = formRef.current;
+        // Champ de la question ; à défaut (récapitulatif), le titre de l'étape.
+        const target =
+          root?.querySelector<HTMLElement>("[data-step-focus] input:checked") ??
+          root?.querySelector<HTMLElement>("[data-step-focus] input") ??
+          root?.querySelector<HTMLElement>("[data-step-focus] h3");
+        target?.focus({ preventScroll: true });
+      },
+      reduce ? 0 : 650,
+    );
+    return () => window.clearTimeout(id);
+  }, [step, navigated, reduce]);
+
+  const goTo = (i: number) => {
+    setDirection(i > step ? 1 : -1);
+    setStep(i);
+    setReached((r) => Math.max(r, i));
+    setNavigated(true);
+  };
+
+  /** Valide la question courante ; en cas d'erreur, la question tremble. */
+  const next = () => {
+    const f = current.field;
+    // Indicatif seul (pré-rempli) = numéro non renseigné : on passe l'étape.
+    if (f === "phone" && Object.values(PREFIX).includes(values.phone)) {
+      update("phone", "");
+      goTo(step + 1);
+      return;
+    }
+    if (f) {
+      setTouched((t) => ({ ...t, [f]: true }));
+      if (errors[f]) {
+        setShake((n) => n + 1);
+        return;
+      }
+    }
+    goTo(Math.min(step + 1, LAST));
+  };
+
   const showOutcome = (o: Outcome) => {
     setOutcome(o);
     // Le message remplace le formulaire : on y amène le focus (lecteurs d'écran, clavier).
@@ -86,11 +197,15 @@ export function Registration() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
-    setSubmitted(true);
+    // « Entrée » dans un champ = passer à la question suivante.
+    if (step < LAST) {
+      next();
+      return;
+    }
     const first = ORDER.find((f) => errors[f]);
     if (first) {
-      setAttempt((n) => n + 1);
-      formRef.current?.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
+      setTouched((t) => ({ ...t, [first]: true }));
+      goTo(ORDER.indexOf(first));
       return;
     }
     if (!backendConfigured) {
@@ -109,10 +224,12 @@ export function Registration() {
       showOutcome({ kind: "already", email, confirmed: data?.confirmed === true });
     else if (httpStatus === 422 && data?.errors) {
       setServerErrors(data.errors);
-      setAttempt((n) => n + 1);
       setOutcome({ kind: "idle" });
       const firstServer = ORDER.find((f) => data.errors?.[f]);
-      if (firstServer) formRef.current?.querySelector<HTMLElement>(`[name="${firstServer}"]`)?.focus();
+      if (firstServer) {
+        setTouched((t) => ({ ...t, [firstServer]: true }));
+        goTo(ORDER.indexOf(firstServer));
+      }
     } else if (httpStatus === 429) setOutcome({ kind: "rate_limited" });
     else setOutcome({ kind: "temporary_error" });
   };
@@ -120,18 +237,15 @@ export function Registration() {
   const reset = () => {
     setValues(EMPTY);
     setTouched({});
-    setSubmitted(false);
     setServerErrors({});
     setOutcome({ kind: "idle" });
-    requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[name="full_name"]')?.focus());
+    setReached(0);
+    goTo(0);
   };
 
-  const errorCount = submitted ? Object.keys(errors).length : 0;
-
-  const PREFIX: Record<string, string> = { BJ: "+229 ", NE: "+227 " };
   const isValid = (f: Field) => values[f].trim().length > 0 && !errors[f];
 
-  const field = (
+  const input = (
     f: Field,
     label: string,
     icon: Parameters<typeof FloatingInput>[0]["icon"],
@@ -153,7 +267,7 @@ export function Registration() {
       onFocus={opts.onFocus}
       onBlur={() => {
         opts.onBlur?.();
-        setTouched((t) => ({ ...t, [f]: true }));
+        if (values[f]) setTouched((t) => ({ ...t, [f]: true }));
       }}
       error={visibleError(f)}
       valid={isValid(f)}
@@ -166,10 +280,89 @@ export function Registration() {
     />
   );
 
-  const tile = (entrance: Entrance, order: number, f: Field | null, children: ReactNode, className = "") => (
-    <Animated entrance={entrance} order={order} shake={attempt} hasError={f ? Boolean(visibleError(f)) : false} className={className}>
-      {children}
-    </Animated>
+  const fieldFor = (f: Field | null): ReactNode => {
+    switch (f) {
+      case "full_name":
+        return input("full_name", "Nom et prénom", ({ value }) => <NameIcon value={value} />, { autoComplete: "name" });
+      case "email":
+        return input("email", "E-mail", (st) => <EmailIcon {...st} />, {
+          type: "email",
+          autoComplete: "email",
+          inputMode: "email",
+          placeholder: "nom@organisation.org",
+        });
+      case "organisation":
+        return input("organisation", "Organisation", ({ value }) => <OrgIcon value={value} />, { autoComplete: "organization" });
+      case "job_title":
+        return input("job_title", "Fonction", ({ focused }) => <JobIcon focused={focused} />, { autoComplete: "organization-title" });
+      case "country":
+        return (
+          <CountryPicker
+            value={values.country}
+            error={visibleError("country")}
+            onChange={(c) => {
+              // L'indicatif téléphonique suit le pays tant que le numéro n'est pas commencé.
+              const onlyPrefix = Object.values(PREFIX).includes(values.phone);
+              update("country", c);
+              if (onlyPrefix) update("phone", PREFIX[c] ?? "");
+            }}
+          />
+        );
+      case "phone":
+        return input("phone", "Téléphone", ({ focused }) => <PhoneIcon focused={focused} />, {
+          type: "tel",
+          autoComplete: "tel",
+          inputMode: "tel",
+          optional: true,
+          placeholder: "01 23 45 67 89",
+          onFocus: () => {
+            if (!values.phone && PREFIX[values.country]) update("phone", PREFIX[values.country]!);
+          },
+          onBlur: () => {
+            if (Object.values(PREFIX).includes(values.phone)) update("phone", "");
+          },
+        });
+      default:
+        return null;
+    }
+  };
+
+  const recap = (
+    <div className="grid gap-2">
+      {ORDER.map((f, i) => {
+        const raw = f === "country" ? (COUNTRY_LABEL[values.country] ?? "") : values[f].trim();
+        return (
+          <motion.div
+            key={f}
+            variants={reduce ? undefined : cascadeItem}
+            className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-white px-4 py-3"
+          >
+            <div className="min-w-0">
+              <p className="text-[0.75rem] font-semibold tracking-wide text-ink-muted uppercase">{STEPS[i]!.label}</p>
+              <p className={`truncate text-body ${raw ? "text-ink" : "text-ink-muted italic"}`}>{raw || "Non renseigné"}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => goTo(i)}
+              className="shrink-0 text-small font-semibold text-forest underline underline-offset-2"
+              aria-label={`Modifier : ${STEPS[i]!.label}`}
+            >
+              Modifier
+            </button>
+          </motion.div>
+        );
+      })}
+      <motion.div variants={reduce ? undefined : cascadeItem} className="mt-2">
+        <ConsentCheck
+          checked={values.marketing_consent}
+          onChange={(v) => update("marketing_consent", v)}
+          label={`J'accepte de recevoir d'autres communications d'${organizerNames(event)}.`}
+        />
+      </motion.div>
+      <motion.div variants={reduce ? undefined : cascadeItem} className="mt-4">
+        <SubmitButton busy={busy} open={backendConfigured} />
+      </motion.div>
+    </div>
   );
 
   const finished = outcome.kind === "sent" || outcome.kind === "pending" || outcome.kind === "already";
@@ -195,69 +388,22 @@ export function Registration() {
               />
             </div>
           ) : (
-            <form ref={formRef} noValidate onSubmit={onSubmit} aria-describedby="form-legend" aria-busy={busy}>
-              <p id="form-legend" className="text-small text-ink-muted">
-                Les champs marqués d'un <span className="text-danger">*</span> sont obligatoires.
+            <form ref={formRef} noValidate onSubmit={onSubmit} aria-busy={busy}>
+              <StepProgress current={step} total={STEPS.length} reached={reached} labels={STEPS.map((s) => s.label)} onJump={goTo} />
+              <p className="sr-only" aria-live="polite">
+                Étape {step + 1} sur {STEPS.length} : {current.label}
               </p>
 
-              {errorCount > 0 && (
-                <p role="alert" className="mt-4 rounded-xl border border-danger/40 bg-white p-4 text-small font-medium text-danger">
-                  {errorCount === 1 ? "Un champ est à corriger." : `${errorCount} champs sont à corriger.`}
-                </p>
-              )}
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {tile("blurRise", 0, "full_name", field("full_name", "Nom et prénom", ({ value }) => <NameIcon value={value} />, { autoComplete: "name" }), "sm:col-span-2")}
-                {tile(
-                  "fromLeft",
-                  1,
-                  "email",
-                  field("email", "E-mail", (st) => <EmailIcon {...st} />, {
-                    type: "email",
-                    autoComplete: "email",
-                    inputMode: "email",
-                    placeholder: "nom@organisation.org",
-                  }),
-                  "sm:col-span-2",
-                )}
-                {tile("flipUp", 2, "organisation", field("organisation", "Organisation", ({ value }) => <OrgIcon value={value} />, { autoComplete: "organization" }))}
-                {tile("fromRight", 3, "job_title", field("job_title", "Fonction", ({ focused }) => <JobIcon focused={focused} />, { autoComplete: "organization-title" }))}
-                {tile(
-                  "zoom",
-                  4,
-                  "country",
-                  <CountryPicker
-                    value={values.country}
-                    error={visibleError("country")}
-                    onChange={(c) => {
-                      // Le préfixe téléphonique suit le pays tant que le numéro n'est pas commencé.
-                      const onlyPrefix = Object.values(PREFIX).includes(values.phone) || values.phone === "";
-                      update("country", c);
-                      if (onlyPrefix && values.phone) update("phone", PREFIX[c] ?? "");
-                      setTouched((t) => ({ ...t, country: true }));
-                    }}
-                  />,
-                  "sm:col-span-2",
-                )}
-                {tile(
-                  "wipe",
-                  5,
-                  "phone",
-                  field("phone", "Téléphone", ({ focused }) => <PhoneIcon focused={focused} />, {
-                    type: "tel",
-                    autoComplete: "tel",
-                    inputMode: "tel",
-                    optional: true,
-                    placeholder: "01 23 45 67 89",
-                    onFocus: () => {
-                      if (!values.phone && PREFIX[values.country]) update("phone", PREFIX[values.country]!);
-                    },
-                    onBlur: () => {
-                      if (Object.values(PREFIX).includes(values.phone)) update("phone", "");
-                    },
-                  }),
-                  "sm:col-span-2",
-                )}
+              <div className="mt-8 min-h-[19rem] sm:min-h-[17rem]">
+                <StepStage stepKey={String(step)} effect={current.effect} direction={direction} shake={shake}>
+                  <div data-step-focus>
+                    <h3 tabIndex={-1} className="text-h3 text-forest focus:outline-none">
+                      {current.question}
+                    </h3>
+                    <p className="mt-2 text-small text-ink-muted">{current.help}</p>
+                    <div className="mt-6">{current.field ? fieldFor(current.field) : recap}</div>
+                  </div>
+                </StepStage>
               </div>
 
               {/* Pot de miel anti-robots : invisible et ignoré par les humains. */}
@@ -275,25 +421,34 @@ export function Registration() {
                 />
               </div>
 
-              {tile(
-                "fade",
-                6,
-                null,
-                <ConsentCheck
-                  checked={values.marketing_consent}
-                  onChange={(v) => update("marketing_consent", v)}
-                  label={`J'accepte de recevoir d'autres communications d'${organizerNames(event)}.`}
-                />,
-                "mt-4",
+              {step < LAST && (
+                <div className="mt-6 flex items-center justify-between gap-3">
+                  {step > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => goTo(step - 1)}
+                      className="inline-flex min-h-12 items-center gap-2 rounded-full px-4 text-small font-semibold text-forest hover:bg-emeraude-soft"
+                    >
+                      <span aria-hidden="true">←</span> Retour
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                  <motion.button
+                    type="submit"
+                    whileHover={reduce ? undefined : { scale: 1.03 }}
+                    whileTap={reduce ? undefined : { scale: 0.96 }}
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-forest px-6 text-body font-semibold text-paper hover:bg-forest-deep"
+                  >
+                    {current.field === "phone" && (!values.phone.trim() || Object.values(PREFIX).includes(values.phone))
+                      ? "Passer cette étape"
+                      : "Continuer"}
+                    <span aria-hidden="true">→</span>
+                  </motion.button>
+                </div>
               )}
+              {step < LAST && <p className="mt-3 text-right text-[0.75rem] text-ink-muted">Astuce : appuyez sur Entrée pour continuer.</p>}
 
-              {tile(
-                "spring",
-                7,
-                null,
-                <SubmitButton busy={busy} open={backendConfigured} />,
-                "mt-8",
-              )}
               <div id="registration-status" role="status" className="mt-4 text-small empty:hidden">
                 {outcome.kind === "closed" && (
                   <p className="text-ink-muted">
