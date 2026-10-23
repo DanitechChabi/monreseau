@@ -148,7 +148,22 @@ l'état « e-mail en attente », ce qui permet de tester ce parcours.
 
 ## Mise en production
 
-### 1. Supabase
+### Déploiement sans la CLI Supabase
+
+`scripts/deploy-supabase.sh` applique les migrations manquantes et déploie les
+7 fonctions via l'API de gestion Supabase (jeton personnel `sbp_…`, jamais écrit
+sur disque) :
+
+```bash
+SUPABASE_ACCESS_TOKEN=sbp_… SUPABASE_PROJECT_REF=llvodwicknbnbbiehgrk bash scripts/deploy-supabase.sh all
+```
+
+**État du projet `llvodwicknbnbbiehgrk` (région eu-west-3)** : migrations
+appliquées, 7 fonctions déployées, inscriptions publiques à Auth désactivées,
+purge quotidienne planifiée (pg_cron, 03:15 UTC). Restent : clé Resend, domaine
+d'envoi, URL définitive du site, administrateurs.
+
+### 1. Supabase (procédure avec la CLI)
 
 1. Créer le projet (région proche de l'Afrique de l'Ouest, par ex. `eu-west`).
 2. `supabase link --project-ref <ref>` puis `supabase db push` (applique `supabase/migrations/`).
@@ -161,10 +176,11 @@ l'état « e-mail en attente », ce qui permet de tester ce parcours.
    `supabase secrets set RESEND_API_KEY=… EMAIL_FROM="…" EMAIL_REPLY_TO=… PUBLIC_SITE_URL=… RESEND_COOLDOWN_MINUTES=5 DATA_RETENTION_MONTHS=12`
    (`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont fournies automatiquement).
 6. `supabase functions deploy` (les réglages `verify_jwt` viennent de `supabase/config.toml`).
-7. Purge automatique (RGPD) : planifier un appel quotidien à `purge-expired`
-   avec la clé service_role, par exemple avec les extensions `pg_cron` et `pg_net`
-   (*Integrations > Cron*), ou depuis tout planificateur externe :
-   `curl -X POST https://<ref>.supabase.co/functions/v1/purge-expired -H "Authorization: Bearer <service_role>"`.
+7. Purge automatique (RGPD) : la migration `20261023130000_purge_schedule.sql`
+   planifie `purge_expired_data(12)` chaque nuit avec pg_cron. Si la durée de
+   conservation change, modifier ce chiffre, `DATA_RETENTION_MONTHS` et
+   `privacy.retentionMonths`. La fonction `purge-expired` reste disponible pour un
+   déclenchement manuel avec la clé service_role.
 
 ### 2. Site
 
@@ -201,12 +217,12 @@ adresse (l'erreur apparaît dans /admin, colonne « dernier envoi »).
 
 ## À faire par les organisateurs
 
-- [ ] Créer le projet Supabase, appliquer les migrations, déployer les fonctions (ci-dessus).
+- [x] Créer le projet Supabase, appliquer les migrations, déployer les fonctions.
+- [x] Désactiver les inscriptions publiques à Supabase Auth, planifier la purge.
 - [ ] Créer le compte Resend, vérifier le domaine d'envoi (SPF, DKIM, DMARC).
 - [ ] Renseigner les secrets et les variables `VITE_*`.
 - [ ] Ajouter les adresses des administrateurs dans `admins`.
-- [ ] Désactiver les inscriptions publiques à Supabase Auth et déclarer l'URL `/admin`.
-- [ ] Planifier la purge quotidienne (`purge-expired`).
+- [ ] Déclarer l'URL définitive du site (secret `PUBLIC_SITE_URL`, Auth *Site URL* et `/admin`).
 - [ ] **Faire valider** la page `/confidentialite` (contenu, durée de conservation,
       mentions légales applicables au Bénin et au Niger).
 - [ ] Valider le libellé de la case de consentement, qui nomme les trois
