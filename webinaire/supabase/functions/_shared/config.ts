@@ -1,3 +1,5 @@
+import { event, type NameFormat } from "./event.ts";
+
 /** Configuration serveur, lue depuis les secrets des Edge Functions. */
 export type ServerConfig = {
   supabaseUrl: string;
@@ -15,6 +17,11 @@ export type ServerConfig = {
   registerMaxPerIpPerHour: number;
   tokenTtlHours: number;
   dataRetentionMonths: number;
+  /** Durée minimale de présence pour valider une ligne importée (minutes). */
+  attendanceMinMinutes: number;
+  /** Format du nom sur la page publique de vérification. */
+  attestationNameFormat: NameFormat;
+  attestationBucket: string;
 };
 
 const int = (v: string | undefined, fallback: number, min = 0) => {
@@ -47,5 +54,10 @@ export function loadConfig(env: (name: string) => string | undefined): ServerCon
     registerMaxPerIpPerHour: int(env("REGISTER_MAX_PER_IP_PER_HOUR"), 10, 1),
     tokenTtlHours: int(env("CONFIRMATION_TOKEN_TTL_HOURS"), 48, 1),
     dataRetentionMonths: int(env("DATA_RETENTION_MONTHS"), 12, 1),
+    attendanceMinMinutes: int(env("ATTENDANCE_MIN_MINUTES"), event.attestation.minAttendanceMinutes, 0),
+    attestationNameFormat: (["first-initial", "initials", "full"] as const).includes(env("ATTESTATION_NAME_FORMAT") as NameFormat)
+      ? (env("ATTESTATION_NAME_FORMAT") as NameFormat)
+      : event.attestation.verificationNameFormat,
+    attestationBucket: env("ATTESTATION_BUCKET") || event.attestation.bucket,
   };
 }

@@ -130,6 +130,9 @@ export const testConfig: ServerConfig = {
   registerMaxPerIpPerHour: 10,
   tokenTtlHours: 48,
   dataRetentionMonths: 12,
+  attendanceMinMinutes: 45,
+  attestationNameFormat: "first-initial",
+  attestationBucket: "attestations",
 };
 
 export function setup(overrides: Partial<ServerConfig> = {}) {

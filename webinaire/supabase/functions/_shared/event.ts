@@ -49,6 +49,37 @@ export type ProgrammeItem = ProgrammeTalk | ProgrammeQA;
 
 export type EventTimezone = { label: string; timeZone: string };
 
+export type Signatory = {
+  /** Nom tel qu'il doit apparaître sous la signature. */
+  name: string;
+  /** Qualité, ex. « Directeur général, Archivexa ». */
+  title: string;
+  /**
+   * Image de signature réelle fournie par le signataire (PNG, fond transparent),
+   * chemin sous public/, ex. "/signatures/prenom-nom.png". `null` → nom et qualité seuls.
+   * Ne jamais fabriquer de signature ni de cachet.
+   */
+  signatureImage: string | null;
+};
+
+/** Format du nom sur la page publique de vérification. */
+export type NameFormat = "first-initial" | "initials" | "full";
+
+export type AttestationConfig = {
+  /** Préfixe du numéro public (ex. AXD-7K2P-9QWM). */
+  codePrefix: string;
+  /** Durée affichée sur l'attestation (minutes). `null` → non affichée. */
+  durationMinutes: number | null;
+  /** Signataires ; liste vide → aucune signature sur l'attestation. */
+  signatories: Signatory[];
+  /** « Prénom N. » par défaut ; surchargeable par ATTESTATION_NAME_FORMAT. */
+  verificationNameFormat: NameFormat;
+  /** Durée minimale de présence (minutes) ; surchargeable par ATTENDANCE_MIN_MINUTES. */
+  minAttendanceMinutes: number;
+  /** Bucket Supabase Storage (privé) ; surchargeable par ATTESTATION_BUCKET. */
+  bucket: string;
+};
+
 export type EventConfig = {
   /** Identifiant de l'événement en base (colonne `event_id`). */
   id: string;
@@ -70,6 +101,7 @@ export type EventConfig = {
     /** Durée de conservation des inscriptions, en mois (garder égal à DATA_RETENTION_MONTHS). */
     retentionMonths: number;
   };
+  attestation: AttestationConfig;
   organizers: Organizer[];
   speakers: Speaker[];
   programme: ProgrammeItem[];
@@ -90,6 +122,15 @@ export const event: EventConfig = {
   joinUrl: null,
   contactEmail: null,
   privacy: { retentionMonths: 12 },
+  attestation: {
+    codePrefix: "AXD",
+    durationMinutes: null,
+    // À compléter avec les signataires réels (nom, qualité, image fournie par eux).
+    signatories: [],
+    verificationNameFormat: "first-initial",
+    minAttendanceMinutes: 45,
+    bucket: "attestations",
+  },
   organizers: [
     // Déposer les fichiers dans public/logos/ puis renseigner le chemin et les dimensions (px).
     {

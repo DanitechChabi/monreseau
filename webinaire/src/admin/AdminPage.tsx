@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { backendConfigured, callFunction } from "../lib/backend";
 import { emailError, normalizeEmail } from "../../supabase/functions/_shared/validation.ts";
 import { supabase } from "./client";
+import { AttendancePanel } from "./AttendancePanel";
 import { Dashboard } from "./Dashboard";
 
 type Gate = "loading" | "signed_out" | "checking" | "admin" | "forbidden";
@@ -81,7 +82,7 @@ export default function AdminPage() {
             </button>
           </Notice>
         ) : (
-          session && <Dashboard session={session} />
+          session && <AdminTabs session={session} />
         )}
       </main>
     </div>
@@ -152,5 +153,32 @@ function LoginForm() {
         {message}
       </p>
     </form>
+  );
+}
+
+function AdminTabs({ session }: { session: Session }) {
+  const [tab, setTab] = useState<"inscriptions" | "attestations">("inscriptions");
+  const tabs = [
+    ["inscriptions", "Inscriptions"],
+    ["attestations", "Présences et attestations"],
+  ] as const;
+  return (
+    <>
+      <div role="tablist" aria-label="Sections de l'administration" className="mb-8 flex flex-wrap gap-2 border-b border-line">
+        {tabs.map(([id, label]) => (
+          <button
+            key={id}
+            role="tab"
+            type="button"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            className={`-mb-px border-b-2 px-4 py-3 text-small font-semibold ${tab === id ? "border-forest text-forest" : "border-transparent text-ink-muted hover:text-ink"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === "inscriptions" ? <Dashboard session={session} /> : <AttendancePanel session={session} />}
+    </>
   );
 }

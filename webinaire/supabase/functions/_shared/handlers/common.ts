@@ -3,10 +3,13 @@ import { randomToken, sha256Hex } from "../crypto.ts";
 import { confirmationEmail, eventDetailsEmail, type RenderedEmail } from "../email/templates.ts";
 import { type EventConfig, withSettings } from "../event.ts";
 import type { Mailer, SendResult } from "../mailer.ts";
+import type { CertRepo } from "../certificates/repo.ts";
 import type { EmailType, RegistrationRecord, Repo } from "../repo.ts";
 
 export type Deps = {
   repo: Repo;
+  /** Présences et attestations (fonctions de la passe 3). */
+  certs?: CertRepo;
   mailer: Mailer;
   config: ServerConfig;
   /** Contenu statique de l'événement (programme, organisateurs…). */

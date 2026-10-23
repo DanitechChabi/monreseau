@@ -8,7 +8,7 @@ import { type Deps, currentEvent, issueAndSendConfirmation, logError, now, sendE
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Vérification serveur : JWT Supabase valide ET adresse présente dans `admins`. */
-async function requireAdmin(req: Request, d: Deps, cors: Record<string, string>): Promise<Response | string> {
+export async function requireAdmin(req: Request, d: Deps, cors: Record<string, string>): Promise<Response | string> {
   const token = bearerToken(req);
   const email = token ? await d.repo.emailFromAccessToken(token) : null;
   if (!email) return json({ status: "unauthorized" }, 401, cors);
@@ -16,7 +16,7 @@ async function requireAdmin(req: Request, d: Deps, cors: Record<string, string>)
   return email;
 }
 
-function preflight(req: Request, d: Deps) {
+export function preflight(req: Request, d: Deps) {
   const cors = corsHeaders(req, d.config);
   if (req.method === "OPTIONS") return { cors, early: new Response(null, { status: 204, headers: cors }) };
   if (req.method !== "POST") return { cors, early: json({ status: "method_not_allowed" }, 405, cors) };

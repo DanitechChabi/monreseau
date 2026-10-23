@@ -15,6 +15,7 @@ import { EventProvider } from "./hooks/useEvent";
 import { SmoothScroll } from "./motion/SmoothScroll";
 import { ConfirmationPage } from "./pages/ConfirmationPage";
 import { PrivacyPage } from "./pages/PrivacyPage";
+import { VerificationPage } from "./pages/VerificationPage";
 
 // L'administration (et le client Supabase) n'est chargée que sur /admin.
 const AdminPage = lazy(() => import("./admin/AdminPage"));
@@ -42,6 +43,8 @@ function Landing() {
 
 function Route() {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const verification = /^\/verification\/([^/]+)$/.exec(path);
+  if (verification) return <VerificationPage code={decodeURIComponent(verification[1]!)} />;
   switch (path) {
     case "/confirmation":
       return <ConfirmationPage />;

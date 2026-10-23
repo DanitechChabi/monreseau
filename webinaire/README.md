@@ -111,6 +111,55 @@ partout ; aucune lecture publique. Les visiteurs anonymes n'ont accès qu'à
 
 ---
 
+## Présences et attestations (passe 3)
+
+**Principe** : l'inscription ne donne jamais droit à une attestation. Seule une
+présence validée par un organisateur dans /admin ouvre ce droit.
+
+### Déroulé pour les organisateurs (/admin › « Présences et attestations »)
+
+1. **Présences** : bouton Présent / Absent par personne, ou **import CSV** de
+   l'export Zoom, Meet ou Teams : choix des colonnes (e-mail, nom, durée), aperçu,
+   puis validation. Rapprochement par e-mail normalisé ; reconnexions
+   additionnées ; les lignes sous le seuil (`ATTENDANCE_MIN_MINUTES`, 45 min) et
+   les personnes non inscrites sont signalées, jamais validées automatiquement.
+2. **Générer les attestations** : un PDF par présent (A4 paysage), stocké dans le
+   bucket privé `attestations`. Exige la date du webinaire (onglet Inscriptions).
+3. **Envoyer les attestations** : e-mail avec le PDF joint, par lots de 20, avec
+   une clé d'idempotence par attestation. En cas d'échec, l'attestation reste
+   « émise » et l'envoi peut être relancé.
+4. Par attestation : télécharger, renvoyer, **corriger le nom** (même numéro, PDF
+   régénéré, tracé dans l'audit), **révoquer** avec motif.
+5. **Journal d'audit** et **export du rapport de délivrance** (CSV).
+
+Une attestation émise n'est jamais régénérée, sauf correction de nom.
+
+### Vérification publique
+
+`/verification/:code` (lien du QR code) affiche le numéro, le nom au format
+« Prénom N. », le titre, la date, les organisateurs et le statut (valide ou
+révoquée). Jamais l'e-mail, le téléphone ni l'organisation. Lecture côté serveur
+uniquement (fonction `verify-certificate`), page non indexée.
+
+### Configuration
+
+Dans `supabase/functions/_shared/event.ts`, bloc `attestation` :
+
+| Champ | Rôle |
+|---|---|
+| `signatories` | Signataires `{ name, title, signatureImage }`. Liste vide : aucune signature. Ne jamais fabriquer de signature ni de cachet. |
+| `durationMinutes` | Durée affichée sur l'attestation (`null` : non affichée). |
+| `codePrefix` | Préfixe du numéro public (`AXD-7K2P-9QWM`). |
+| `verificationNameFormat` | `first-initial` (« Awa D. »), `initials`, `full`. |
+| `minAttendanceMinutes`, `bucket` | Valeurs par défaut des secrets ci-dessous. |
+
+Secrets facultatifs des fonctions : `ATTENDANCE_MIN_MINUTES`,
+`ATTESTATION_NAME_FORMAT`, `ATTESTATION_BUCKET`.
+
+Les polices, logos et signatures sont intégrés au code des fonctions
+(`_shared/certificates/assets.gen.ts`). Après ajout d'un logo ou d'une image de
+signature dans `public/` : `npm run embed-assets`, puis redéployer les fonctions.
+
 ## Tests
 
 ```bash
@@ -121,6 +170,12 @@ npm run check:functions   # vérification TypeScript des Edge Functions (Deno re
 
 Avec Supabase en local, les tests de base s'exécutent aussi contre lui :
 `DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres npx vitest run tests/db.test.ts`.
+
+Attestations : présent validé, inscrit absent, import CSV avec doublons et seuil,
+génération PDF (A4 paysage, numéro), QR code (décodé lors de la recette), envoi
+avec pièce jointe, renvoi sans doublon, échec Resend et reprise, correction de
+nom et révocation, accès non autorisé, vérification valide / révoquée / inconnue,
+absence de données personnelles sur la vérification, RLS des nouvelles tables.
 
 Couverture : nouvelle inscription, adresse invalide, adresse déjà inscrite,
 absence de doublon (requêtes simultanées et contrainte unique), renvoi, délai et
@@ -238,6 +293,14 @@ adresse (l'erreur apparaît dans /admin, colonne « dernier envoi »).
 ---
 
 ## À faire par les organisateurs
+
+Pour les attestations :
+- [ ] Fixer la **date officielle** dans /admin (obligatoire pour générer).
+- [ ] Fournir les **signataires** (nom, qualité) et, s'ils le souhaitent, une
+      **image de leur signature** (PNG, fond transparent). À défaut, l'attestation
+      ne porte aucune signature.
+- [ ] Indiquer la **durée** à afficher, si souhaité.
+- [ ] Logos en haute définition (celui de RMBI provient d'un document scanné).
 
 - [x] Créer le projet Supabase, appliquer les migrations, déployer les fonctions.
 - [x] Désactiver les inscriptions publiques à Supabase Auth, planifier la purge.

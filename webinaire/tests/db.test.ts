@@ -205,4 +205,41 @@ describe.skipIf(!url)("base de données", () => {
     expect((await client.query("select public.purge_expired_data(12) as n")).rows[0].n).toBe(1);
     expect((await client.query("select email from public.registrations")).rows.map((r) => r.email)).toEqual(["recent@example.org"]);
   });
+
+  it("présences et attestations : aucune lecture publique, lecture réservée aux admins, contraintes", async () => {
+    await as("service_role");
+    const r = await register("awa@example.org");
+    await client.query("insert into public.attendance (registration_id, status, minutes, source, validated_by) values ($1,'present',52,'csv',$2)", [r.id, ADMIN]);
+    await client.query("insert into public.certificates (registration_id, holder_name, public_code) values ($1,'Awa Diallo','AXD-7K2P-9QWM')", [r.id]);
+    await client.query("insert into public.audit_log (action, admin, target) values ('attendance.set', $1, $2)", [ADMIN, r.id]);
+
+    await as("anon");
+    for (const t of ["attendance", "certificates", "audit_log", "admin_attendance"]) {
+      await expect(savepoint(() => client.query(`select * from public.${t}`)), t).rejects.toThrow(/permission denied/);
+    }
+    await as("authenticated", "intrus@example.org");
+    for (const t of ["attendance", "certificates", "audit_log", "admin_attendance"]) {
+      expect((await client.query(`select * from public.${t}`)).rowCount, t).toBe(0);
+    }
+    await expect(savepoint(() => client.query("update public.certificates set status='issued'"))).rejects.toThrow(/permission denied/);
+
+    await as("authenticated", ADMIN);
+    const { rows } = await client.query("select full_name, attendance_status, minutes, public_code, certificate_status from public.admin_attendance");
+    expect(rows).toEqual([{ full_name: "Awa Diallo", attendance_status: "present", minutes: 52, public_code: "AXD-7K2P-9QWM", certificate_status: "eligible" }]);
+
+    await as("service_role");
+    // Révocation sans motif, émission sans fichier, numéro mal formé : refusés.
+    await expect(savepoint(() => client.query("update public.certificates set status='revoked'"))).rejects.toThrow(/check constraint/);
+    await expect(savepoint(() => client.query("update public.certificates set status='issued'"))).rejects.toThrow(/check constraint/);
+    const r2 = await register("bio@example.org", "Bio Sanni");
+    await expect(
+      savepoint(() => client.query("insert into public.certificates (registration_id, holder_name, public_code) values ($1,'Bio Sanni','AXD-0001')", [r2.id])),
+    ).rejects.toThrow(/check constraint/);
+    // Une seule attestation par inscription.
+    await expect(
+      savepoint(() => client.query("insert into public.certificates (registration_id, holder_name, public_code) values ($1,'Awa Diallo','AXD-2345-6789')", [r.id])),
+    ).rejects.toThrow(/duplicate key/);
+    // Le journal d'envoi accepte le type « certificate ».
+    await client.query("insert into public.email_log (registration_id, type, status) values ($1,'certificate','sent')", [r.id]);
+  });
 });

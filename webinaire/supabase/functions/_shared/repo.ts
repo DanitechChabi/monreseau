@@ -11,7 +11,7 @@ export type RegistrationRecord = {
   status: RegistrationStatus;
 };
 
-export type EmailType = "confirmation" | "event_details" | "admin_login";
+export type EmailType = "confirmation" | "event_details" | "admin_login" | "certificate";
 export type ConfirmResult = "ok" | "expired" | "invalid";
 
 /**

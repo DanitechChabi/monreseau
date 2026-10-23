@@ -351,3 +351,54 @@ export function adminLoginEmail(args: { cfg: EventConfig; loginUrl: string; site
   const text = ["Bonjour,", intro, `Se connecter :\n${loginUrl}`, note, "L'équipe d'organisation", "—", foot.text].join("\n\n");
   return { subject, html, text };
 }
+
+/* ---------------------------------------------------------------------------
+ * Attestation de participation (PDF en pièce jointe)
+ * ------------------------------------------------------------------------- */
+
+export function certificateEmail(args: {
+  cfg: EventConfig;
+  fullName: string;
+  code: string;
+  eventDate: string;
+  verifyUrl: string;
+  siteUrl: string;
+}): RenderedEmail {
+  const { cfg, fullName, code, eventDate, verifyUrl, siteUrl } = args;
+  const subject = "Votre attestation de participation au webinaire";
+  const title = "Votre attestation de participation";
+  const thanks = `Nous vous remercions d'avoir participé au webinaire « ${cfg.title} », le ${eventDate}.`;
+  const attached = `Vous trouverez en pièce jointe votre attestation de participation, au format PDF (n° ${code}).`;
+  const verify = "Son authenticité peut être vérifiée à tout moment, en scannant le QR code qui y figure ou à l'adresse suivante :";
+  const team = cfg.organizers.map((o) => o.name).join(" · ");
+  const foot = footer(siteUrl, "Vous recevez ce message parce que votre présence au webinaire a été validée par les organisateurs.");
+
+  const html = layout(cfg, {
+    preheader: "Votre attestation de participation est jointe à ce message.",
+    title,
+    body:
+      p(`Bonjour ${esc(fullName)},`) +
+      p(esc(thanks)) +
+      p(esc(attached)) +
+      p(
+        `${esc(verify)}<br><a href="${esc(verifyUrl)}" style="color:${C.accent};word-break:break-all;">${esc(verifyUrl)}</a>`,
+        `color:${C.muted};`,
+      ) +
+      `<div style="margin-top:32px;padding-top:24px;border-top:1px solid ${C.rule};">${p("Bien cordialement,")}${p(
+        `<strong style="font-weight:600;">L'équipe organisatrice</strong><br><span style="color:${C.muted};">${esc(team)}</span>`,
+        "margin:0;",
+      )}</div>`,
+    footer: foot.html,
+  });
+  const text = [
+    `Bonjour ${fullName},`,
+    thanks,
+    attached,
+    `${verify}\n${verifyUrl}`,
+    "Bien cordialement,",
+    `L'équipe organisatrice\n${team}`,
+    "—",
+    foot.text,
+  ].join("\n\n");
+  return { subject, html, text };
+}

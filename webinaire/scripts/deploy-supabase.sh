@@ -44,7 +44,7 @@ PY
 }
 
 # slug:verify_jwt (doit correspondre à supabase/config.toml)
-FUNCTIONS="register:false resend-confirmation:false confirm:false admin-login:false admin-resend:true admin-announce:true purge-expired:false"
+FUNCTIONS="register:false resend-confirmation:false confirm:false admin-login:false admin-resend:true admin-announce:true purge-expired:false admin-attendance:true admin-certificates:true verify-certificate:false"
 
 functions() {
   cd supabase/functions
@@ -53,8 +53,8 @@ functions() {
   for item in $FUNCTIONS; do
     local slug=${item%%:*} verify=${item##*:}
     curl -sS --fail-with-body -m 300 -X POST "${AUTH[@]}" \
-      -F "metadata={\"entrypoint_path\":\"$slug/index.ts\",\"name\":\"$slug\",\"verify_jwt\":$verify};type=application/json" \
-      -F "file=@$slug/index.ts;filename=$slug/index.ts" "${shared[@]}" \
+      -F "metadata={\"entrypoint_path\":\"$slug/index.ts\",\"import_map_path\":\"import_map.json\",\"name\":\"$slug\",\"verify_jwt\":$verify};type=application/json" \
+      -F "file=@$slug/index.ts;filename=$slug/index.ts" -F "file=@import_map.json;filename=import_map.json" "${shared[@]}" \
       "$API/functions/deploy?slug=$slug" |
       python3 -c 'import json,sys; d=json.load(sys.stdin); print("fonction %s : %s (version %s, verify_jwt=%s)" % (d["slug"], d["status"], d["version"], d["verify_jwt"]))'
   done

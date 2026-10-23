@@ -27,9 +27,9 @@ export function clientIp(req: Request): string {
 }
 
 /** Lit un corps JSON objet, en refusant les corps trop gros. `null` si invalide. */
-export async function readJson(req: Request): Promise<Record<string, unknown> | null> {
+export async function readJson(req: Request, maxBytes = MAX_BODY_BYTES): Promise<Record<string, unknown> | null> {
   const text = await req.text();
-  if (text.length > MAX_BODY_BYTES) return null;
+  if (text.length > maxBytes) return null;
   try {
     const data: unknown = JSON.parse(text);
     return data && typeof data === "object" && !Array.isArray(data) ? (data as Record<string, unknown>) : null;

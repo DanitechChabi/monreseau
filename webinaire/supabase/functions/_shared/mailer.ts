@@ -11,6 +11,8 @@ export type OutgoingEmail = {
   /** Évite les doublons si la même requête est rejouée (double clic, nouvelle tentative). */
   idempotencyKey: string;
   tags?: { name: string; value: string }[];
+  /** Pièces jointes, contenu encodé en base64. */
+  attachments?: { filename: string; content: string }[];
 };
 
 export type SendResult = { ok: true; id: string } | { ok: false; code: string };
@@ -39,6 +41,7 @@ export class ResendMailer implements Mailer {
       text: e.text,
       ...(this.opts.replyTo ? { reply_to: this.opts.replyTo } : {}),
       ...(e.tags ? { tags: e.tags } : {}),
+      ...(e.attachments?.length ? { attachments: e.attachments } : {}),
     };
   }
 

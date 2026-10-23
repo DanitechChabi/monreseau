@@ -1,5 +1,6 @@
 // Implémentation Deno de Repo (clé service_role). Non importée par les tests Node.
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.118.0";
+import type { AttendanceStatus, CertificateRecord, CertificateStatus, CertRepo, RegistrationLite } from "./certificates/repo.ts";
 import type { EventSettings } from "./event.ts";
 import type { ConfirmResult, EmailType, RegistrationRecord, Repo } from "./repo.ts";
 import type { RegistrationInput } from "./validation.ts";
@@ -138,5 +139,125 @@ export class SupabaseRepo implements Repo {
 
   async purgeExpired(months: number) {
     return check(await this.db.rpc("purge_expired_data", { p_months: months })) as number;
+  }
+}
+
+/* ---------- Passe 3 : présences, attestations, stockage, audit ---------- */
+
+
+const CERT_COLS =
+  "id, public_code, registration_id, holder_name, status, revoked_reason, file_path, event_date, issued_at, sent_at, send_attempts, last_error";
+
+export class SupabaseCertRepo implements CertRepo {
+  private readonly db: SupabaseClient;
+
+  constructor(url: string, serviceRoleKey: string, private readonly bucket: string) {
+    this.db = createClient(url, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  }
+
+  async listRegistrations(eventId: string) {
+    const out: RegistrationLite[] = [];
+    for (let from = 0; ; from += 1000) {
+      const page = check(
+        await this.db.from("registrations").select("id, event_id, email, full_name, status").eq("event_id", eventId).range(from, from + 999),
+      ) as RegistrationLite[];
+      out.push(...page);
+      if (page.length < 1000) return out;
+    }
+  }
+
+  async getRegistration(id: string) {
+    return check(
+      await this.db.from("registrations").select("id, event_id, email, full_name, status").eq("id", id).maybeSingle(),
+    ) as RegistrationLite | null;
+  }
+
+  async setAttendance(e: { registrationId: string; status: AttendanceStatus; minutes: number | null; source: "manual" | "csv"; validatedBy: string }) {
+    check(
+      await this.db.from("attendance").upsert({
+        registration_id: e.registrationId,
+        status: e.status,
+        minutes: e.minutes,
+        source: e.source,
+        validated_by: e.validatedBy,
+        validated_at: new Date().toISOString(),
+      }),
+    );
+  }
+
+  async getAttendanceStatus(registrationId: string) {
+    const row = check(await this.db.from("attendance").select("status").eq("registration_id", registrationId).maybeSingle()) as {
+      status: AttendanceStatus;
+    } | null;
+    return row?.status ?? null;
+  }
+
+  private async one(col: string, value: string) {
+    return check(await this.db.from("certificates").select(CERT_COLS).eq(col, value).maybeSingle()) as CertificateRecord | null;
+  }
+  certificateByRegistration(id: string) {
+    return this.one("registration_id", id);
+  }
+  certificateById(id: string) {
+    return this.one("id", id);
+  }
+  certificateByCode(code: string) {
+    return this.one("public_code", code);
+  }
+
+  async insertCertificate(c: { registrationId: string; holderName: string; publicCode: string }) {
+    const { data, error } = await this.db
+      .from("certificates")
+      .insert({ registration_id: c.registrationId, holder_name: c.holderName, public_code: c.publicCode })
+      .select(CERT_COLS)
+      .single();
+    if (error) {
+      // 23505 : violation d'unicité. Sur registration_id, l'attestation existe déjà.
+      if (error.code === "23505" && error.message.includes("public_code")) return null;
+      if (error.code === "23505") return await this.certificateByRegistration(c.registrationId);
+      throw error;
+    }
+    return data as CertificateRecord;
+  }
+
+  async deleteCertificate(id: string) {
+    check(await this.db.from("certificates").delete().eq("id", id));
+  }
+
+  async updateCertificate(id: string, patch: Partial<CertificateRecord>) {
+    check(await this.db.from("certificates").update(patch).eq("id", id));
+  }
+
+  async listCertificates(status: CertificateStatus, limit: number) {
+    return check(
+      await this.db.from("certificates").select(CERT_COLS).eq("status", status).order("created_at").limit(limit),
+    ) as CertificateRecord[];
+  }
+
+  async countCertificates(status: CertificateStatus) {
+    const { count, error } = await this.db.from("certificates").select("id", { count: "exact", head: true }).eq("status", status);
+    if (error) throw error;
+    return count ?? 0;
+  }
+
+  async putPdf(path: string, bytes: Uint8Array, overwrite: boolean) {
+    const { error } = await this.db.storage.from(this.bucket).upload(path, bytes, { contentType: "application/pdf", upsert: overwrite });
+    if (error) throw error;
+  }
+
+  async getPdf(path: string) {
+    const { data, error } = await this.db.storage.from(this.bucket).download(path);
+    if (error || !data) throw error ?? new Error("pdf introuvable");
+    return new Uint8Array(await data.arrayBuffer());
+  }
+
+  async signedUrl(path: string, seconds: number) {
+    const { data, error } = await this.db.storage.from(this.bucket).createSignedUrl(path, seconds, { download: true });
+    if (error || !data) throw error ?? new Error("lien indisponible");
+    return data.signedUrl;
+  }
+
+  async audit(action: string, admin: string, target: string | null, details: Record<string, unknown>) {
+    check(await this.db.from("audit_log").insert({ action, admin, target, details }));
   }
 }

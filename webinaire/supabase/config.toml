@@ -59,3 +59,17 @@ verify_jwt = true
 # Appelée par une tâche planifiée avec la clé service_role.
 [functions.purge-expired]
 verify_jwt = false
+
+# Passe 3 : présences et attestations.
+[functions.admin-attendance]
+verify_jwt = true
+import_map = "./functions/import_map.json"
+
+[functions.admin-certificates]
+verify_jwt = true
+import_map = "./functions/import_map.json"
+
+# Vérification publique d'une attestation (page /verification/:code).
+[functions.verify-certificate]
+verify_jwt = false
+import_map = "./functions/import_map.json"
