@@ -160,8 +160,26 @@ SUPABASE_ACCESS_TOKEN=sbp_… SUPABASE_PROJECT_REF=llvodwicknbnbbiehgrk bash scr
 
 **État du projet `llvodwicknbnbbiehgrk` (région eu-west-3)** : migrations
 appliquées, 7 fonctions déployées, inscriptions publiques à Auth désactivées,
-purge quotidienne planifiée (pg_cron, 03:15 UTC). Restent : clé Resend, domaine
-d'envoi, URL définitive du site, administrateurs.
+purge quotidienne planifiée (pg_cron, 03:15 UTC), `PUBLIC_SITE_URL` et
+redirections Auth pointant vers le site Vercel. Restent : clé Resend, domaine
+d'envoi, administrateurs.
+
+### Site sur Vercel
+
+En ligne : **https://webinaire-archivexa-docflow.vercel.app** (équipe Vercel
+« archivexa », projet `webinaire-archivexa-docflow`). Les variables
+`VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` sont réglées dans le projet ;
+la compilation se fait chez Vercel (`vercel.json`).
+
+Le projet n'est pas relié au dépôt GitHub : un push ne republie pas le site.
+Pour republier depuis `webinaire/` :
+
+```bash
+VERCEL_TOKEN=vcp_… npx vercel@latest deploy --prod --yes
+```
+
+(La première fois sur une nouvelle machine : `npx vercel@latest link --yes --project webinaire-archivexa-docflow --scope archivexa`.)
+Pour une publication automatique à chaque push : Vercel › projet › Settings › Git › Connect.
 
 ### 1. Supabase (procédure avec la CLI)
 
@@ -222,7 +240,8 @@ adresse (l'erreur apparaît dans /admin, colonne « dernier envoi »).
 - [ ] Créer le compte Resend, vérifier le domaine d'envoi (SPF, DKIM, DMARC).
 - [ ] Renseigner les secrets et les variables `VITE_*`.
 - [ ] Ajouter les adresses des administrateurs dans `admins`.
-- [ ] Déclarer l'URL définitive du site (secret `PUBLIC_SITE_URL`, Auth *Site URL* et `/admin`).
+- [x] Publier le site (Vercel) et déclarer son URL côté Supabase.
+- [ ] Si un nom de domaine propre est utilisé pour le site : l'ajouter dans Vercel, puis mettre à jour `PUBLIC_SITE_URL` et les URL Auth.
 - [ ] **Faire valider** la page `/confidentialite` (contenu, durée de conservation,
       mentions légales applicables au Bénin et au Niger).
 - [ ] Valider le libellé de la case de consentement, qui nomme les trois
