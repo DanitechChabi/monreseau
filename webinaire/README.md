@@ -161,8 +161,12 @@ SUPABASE_ACCESS_TOKEN=sbp_… SUPABASE_PROJECT_REF=llvodwicknbnbbiehgrk bash scr
 **État du projet `llvodwicknbnbbiehgrk` (région eu-west-3)** : migrations
 appliquées, 7 fonctions déployées, inscriptions publiques à Auth désactivées,
 purge quotidienne planifiée (pg_cron, 03:15 UTC), `PUBLIC_SITE_URL` et
-redirections Auth pointant vers le site Vercel. Restent : clé Resend, domaine
-d'envoi, administrateurs.
+redirections Auth pointant vers le site Vercel, clé Resend installée.
+
+**E-mails** : domaine d'envoi `webinaire.kotiza.org` vérifié chez Resend
+(DKIM, SPF et DMARC dans le DNS Vercel de `kotiza.org`), expéditeur
+`webinaire@webinaire.kotiza.org`. Envoi réel testé et délivré. Restent : les
+administrateurs et, si souhaité, une adresse de réponse (`EMAIL_REPLY_TO`).
 
 ### Site sur Vercel
 
@@ -237,8 +241,8 @@ adresse (l'erreur apparaît dans /admin, colonne « dernier envoi »).
 
 - [x] Créer le projet Supabase, appliquer les migrations, déployer les fonctions.
 - [x] Désactiver les inscriptions publiques à Supabase Auth, planifier la purge.
-- [ ] Créer le compte Resend, vérifier le domaine d'envoi (SPF, DKIM, DMARC).
-- [ ] Renseigner les secrets et les variables `VITE_*`.
+- [x] Créer le compte Resend, vérifier le domaine d'envoi (SPF, DKIM, DMARC).
+- [x] Renseigner les secrets et les variables `VITE_*`.
 - [ ] Ajouter les adresses des administrateurs dans `admins`.
 - [x] Publier le site (Vercel) et déclarer son URL côté Supabase.
 - [ ] Si un nom de domaine propre est utilisé pour le site : l'ajouter dans Vercel, puis mettre à jour `PUBLIC_SITE_URL` et les URL Auth.
