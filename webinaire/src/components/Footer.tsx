@@ -1,6 +1,7 @@
-import { event } from "../config/event";
+import { useEvent } from "../hooks/useEvent";
 
 export function Footer() {
+  const event = useEvent();
   return (
     <footer className="bg-forest-deep py-12 text-mist">
       <div className="container-page flex flex-col gap-6 md:flex-row md:items-end md:justify-between">

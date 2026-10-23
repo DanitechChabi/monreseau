@@ -1,3 +1,9 @@
 node_modules/
 dist/
 *.tsbuildinfo
+supabase/functions/.env
+.env.local
+.env
+.supabase/
+supabase/.temp/
+supabase/.branches/

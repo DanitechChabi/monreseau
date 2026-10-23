@@ -1,6 +1,7 @@
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { useRef } from "react";
-import { event, type ProgrammeItem, type Speaker } from "../config/event";
+import type { EventConfig, ProgrammeItem, Speaker } from "../config/event";
+import { useEvent } from "../hooks/useEvent";
 import { Reveal } from "./Reveal";
 import { SectionHeading } from "./SectionHeading";
 
@@ -38,13 +39,14 @@ function Portrait({ speaker }: { speaker: Speaker }) {
   );
 }
 
-function duration(item: ProgrammeItem): string | null {
+function duration(event: EventConfig, item: ProgrammeItem): string | null {
   const minutes = item.kind === "talk" ? item.durationMinutes : event.qaDurationMinutes;
   if (minutes === null) return null;
   return item.kind === "talk" ? `Environ ${minutes} min` : `${minutes} min`;
 }
 
 export function Programme() {
+  const event = useEvent();
   const listRef = useRef<HTMLOListElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: listRef, offset: ["start 75%", "end 55%"] });
@@ -72,7 +74,7 @@ export function Programme() {
 
           {event.programme.map((item, i) => {
             const speaker = item.kind === "talk" ? speakers.get(item.speakerId) : undefined;
-            const time = duration(item);
+            const time = duration(event, item);
             return (
               <Reveal as="li" key={i} className="relative grid grid-cols-[56px_1fr] gap-5 pb-12 last:pb-0 sm:gap-8">
                 <div className="relative z-10">

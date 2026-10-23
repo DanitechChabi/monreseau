@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { event } from "../config/event";
+import { useEvent } from "../hooks/useEvent";
 import { getEventStart } from "../lib/datetime";
 
 function parts(ms: number) {
@@ -13,6 +13,7 @@ function parts(ms: number) {
 
 /** Compte à rebours : n'existe que si la date ET l'heure sont confirmées et à venir. */
 export function Countdown() {
+  const event = useEvent();
   const startMs = getEventStart(event)?.getTime() ?? null;
   const [now, setNow] = useState(() => Date.now());
 

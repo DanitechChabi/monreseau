@@ -1,0 +1,61 @@
+# Configuration Supabase CLI (développement local : `supabase start`).
+# Les réglages du projet hébergé se font dans le tableau de bord Supabase.
+project_id = "webinaire-archivexa-docflow"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+# Boîte mail de test locale (liens magiques Supabase) : http://127.0.0.1:54324
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/admin", "http://127.0.0.1:5173/admin"]
+jwt_expiry = 3600
+# Personne ne peut créer de compte : les comptes administrateurs sont créés
+# par la fonction admin-login, pour les seules adresses de la table admins.
+enable_signup = false
+
+[auth.email]
+enable_signup = false
+enable_confirmations = false
+
+# Fonctions publiques : appelées depuis le site (ou un lien d'e-mail) sans session.
+[functions.register]
+verify_jwt = false
+
+[functions.resend-confirmation]
+verify_jwt = false
+
+[functions.confirm]
+verify_jwt = false
+
+[functions.admin-login]
+verify_jwt = false
+
+# Fonctions d'administration : JWT exigé par la passerelle, puis contrôle de la
+# table admins dans la fonction.
+[functions.admin-resend]
+verify_jwt = true
+
+[functions.admin-announce]
+verify_jwt = true
+
+# Appelée par une tâche planifiée avec la clé service_role.
+[functions.purge-expired]
+verify_jwt = false

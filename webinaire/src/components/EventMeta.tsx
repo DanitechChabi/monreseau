@@ -1,8 +1,9 @@
-import { event } from "../config/event";
+import { useEvent } from "../hooks/useEvent";
 import { formatEventDate, formatEventTimes } from "../lib/datetime";
 
 /** Date et heure, uniquement si elles sont confirmées dans la configuration. */
 export function EventMeta({ className = "" }: { className?: string }) {
+  const event = useEvent();
   const date = formatEventDate(event);
   const times = formatEventTimes(event);
   if (!date && !times) return null;

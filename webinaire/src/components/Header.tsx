@@ -1,16 +1,16 @@
 import { event } from "../config/event";
 
 const links = [
-  { href: "#programme", label: "Programme" },
-  { href: "#organisateurs", label: "Organisateurs" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/#programme", label: "Programme" },
+  { href: "/#organisateurs", label: "Organisateurs" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-forest-line/70 bg-forest">
       <div className="container-page flex h-16 items-center justify-between gap-4">
-        <a href="#top" className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 font-display text-small font-semibold text-paper sm:gap-x-2 sm:text-body">
+        <a href="/#top" className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 font-display text-small font-semibold text-paper sm:gap-x-2 sm:text-body">
           {event.organizers.map((o, i) => (
             <span key={o.name} className="flex items-baseline gap-1.5 whitespace-nowrap sm:gap-2">
               {i > 0 && (
@@ -36,7 +36,7 @@ export function Header() {
             ))}
           </ul>
           <a
-            href="#inscription"
+            href="/#inscription"
             className="inline-flex min-h-10 items-center rounded-full bg-emeraude px-4 text-small font-semibold text-ink transition-colors hover:bg-white"
           >
             <span className="sm:hidden">S'inscrire</span>
