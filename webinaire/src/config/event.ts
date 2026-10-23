@@ -101,7 +101,7 @@ export const event: EventConfig = {
   speakers: [
     { id: "ousmane", name: "Ousmane Abdou", portrait: "/speakers/ousmane-abdou.jpg" },
     { id: "roguy", name: "Roguy", portrait: null },
-    { id: "daniel", name: "Daniel", portrait: null },
+    { id: "daniel", name: "Daniel", portrait: "/speakers/daniel.jpg" },
   ],
   programme: [
     {
