@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { organizerNames } from "../config/event";
 import { useEvent } from "../hooks/useEvent";
 import { backendConfigured, callFunction } from "../lib/backend";
@@ -7,6 +7,10 @@ import {
   type RegistrationField,
   validateRegistration,
 } from "../../supabase/functions/_shared/validation.ts";
+import { ConsentCheck, CountryPicker } from "./form/Choices";
+import { EmailIcon, JobIcon, NameIcon, OrgIcon, PhoneIcon } from "./form/FieldIcons";
+import { Animated, type Entrance, FloatingInput } from "./form/FieldTile";
+import { SubmitButton } from "./form/SubmitButton";
 import { ResendConfirmation } from "./ResendConfirmation";
 import { SectionHeading } from "./SectionHeading";
 
@@ -41,9 +45,6 @@ type Outcome =
   | { kind: "temporary_error" }
   | { kind: "closed" };
 
-const inputCls =
-  "mt-2 block min-h-12 w-full rounded-xl border bg-white px-4 text-body text-ink transition-colors focus:border-forest";
-
 function clientErrors(v: Values): FieldErrors {
   const r = validateRegistration(v);
   return r.ok ? {} : r.errors;
@@ -56,6 +57,7 @@ export function Registration() {
   const [submitted, setSubmitted] = useState(false);
   const [serverErrors, setServerErrors] = useState<FieldErrors>({});
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
+  const [attempt, setAttempt] = useState(0);
   const [resendEmail, setResendEmail] = useState<{ email: string; nonce: number } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
@@ -87,6 +89,7 @@ export function Registration() {
     setSubmitted(true);
     const first = ORDER.find((f) => errors[f]);
     if (first) {
+      setAttempt((n) => n + 1);
       formRef.current?.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
       return;
     }
@@ -106,6 +109,7 @@ export function Registration() {
       showOutcome({ kind: "already", email, confirmed: data?.confirmed === true });
     else if (httpStatus === 422 && data?.errors) {
       setServerErrors(data.errors);
+      setAttempt((n) => n + 1);
       setOutcome({ kind: "idle" });
       const firstServer = ORDER.find((f) => data.errors?.[f]);
       if (firstServer) formRef.current?.querySelector<HTMLElement>(`[name="${firstServer}"]`)?.focus();
@@ -124,50 +128,54 @@ export function Registration() {
 
   const errorCount = submitted ? Object.keys(errors).length : 0;
 
+  const PREFIX: Record<string, string> = { BJ: "+229 ", NE: "+227 " };
+  const isValid = (f: Field) => values[f].trim().length > 0 && !errors[f];
+
   const field = (
     f: Field,
     label: string,
-    opts: { type?: string; autoComplete?: string; optional?: boolean; inputMode?: "tel" | "email" } = {},
-  ) => {
-    const err = visibleError(f);
-    return (
-      <div>
-        <label htmlFor={f} className="text-small font-semibold text-ink">
-          {label}
-          {opts.optional ? (
-            <span className="font-normal text-ink-muted"> (facultatif)</span>
-          ) : (
-            <span aria-hidden="true" className="text-danger"> *</span>
-          )}
-        </label>
-        <input
-          id={f}
-          name={f}
-          type={opts.type ?? "text"}
-          inputMode={opts.inputMode}
-          autoComplete={opts.autoComplete}
-          value={values[f]}
-          required={!opts.optional}
-          aria-invalid={err ? true : undefined}
-          aria-describedby={err ? `${f}-error` : undefined}
-          onChange={(e) => update(f, e.target.value)}
-          onBlur={() => setTouched((t) => ({ ...t, [f]: true }))}
-          className={`${inputCls} ${err ? "border-danger" : "border-line"}`}
-        />
-        {err && (
-          <p id={`${f}-error`} className="mt-2 text-small text-danger">
-            {err}
-          </p>
-        )}
-      </div>
-    );
-  };
+    icon: Parameters<typeof FloatingInput>[0]["icon"],
+    opts: {
+      type?: string;
+      autoComplete?: string;
+      optional?: boolean;
+      inputMode?: "tel" | "email";
+      placeholder?: string;
+      onFocus?: () => void;
+      onBlur?: () => void;
+    } = {},
+  ) => (
+    <FloatingInput
+      id={f}
+      label={label}
+      value={values[f]}
+      onChange={(v) => update(f, v)}
+      onFocus={opts.onFocus}
+      onBlur={() => {
+        opts.onBlur?.();
+        setTouched((t) => ({ ...t, [f]: true }));
+      }}
+      error={visibleError(f)}
+      valid={isValid(f)}
+      optional={opts.optional}
+      type={opts.type}
+      autoComplete={opts.autoComplete}
+      inputMode={opts.inputMode}
+      placeholder={opts.placeholder}
+      icon={icon}
+    />
+  );
 
-  const countryErr = visibleError("country");
+  const tile = (entrance: Entrance, order: number, f: Field | null, children: ReactNode, className = "") => (
+    <Animated entrance={entrance} order={order} shake={attempt} hasError={f ? Boolean(visibleError(f)) : false} className={className}>
+      {children}
+    </Animated>
+  );
+
   const finished = outcome.kind === "sent" || outcome.kind === "pending" || outcome.kind === "already";
 
   return (
-    <section id="inscription" aria-labelledby="inscription-title" className="bg-forest py-20 md:py-28">
+    <section id="inscription" aria-labelledby="inscription-title" className="overflow-x-clip bg-forest py-20 md:py-28">
       <div className="container-page grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
         <SectionHeading
           id="inscription-title"
@@ -198,47 +206,58 @@ export function Registration() {
                 </p>
               )}
 
-              <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                <div className="sm:col-span-2">{field("full_name", "Nom et prénom", { autoComplete: "name" })}</div>
-                <div className="sm:col-span-2">
-                  {field("email", "E-mail", { type: "email", autoComplete: "email", inputMode: "email" })}
-                </div>
-                {field("organisation", "Organisation", { autoComplete: "organization" })}
-                {field("job_title", "Fonction", { autoComplete: "organization-title" })}
-                <div>
-                  <label htmlFor="country" className="text-small font-semibold text-ink">
-                    Pays<span aria-hidden="true" className="text-danger"> *</span>
-                  </label>
-                  <select
-                    id="country"
-                    name="country"
-                    required
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                {tile("blurRise", 0, "full_name", field("full_name", "Nom et prénom", ({ value }) => <NameIcon value={value} />, { autoComplete: "name" }), "sm:col-span-2")}
+                {tile(
+                  "fromLeft",
+                  1,
+                  "email",
+                  field("email", "E-mail", (st) => <EmailIcon {...st} />, {
+                    type: "email",
+                    autoComplete: "email",
+                    inputMode: "email",
+                    placeholder: "nom@organisation.org",
+                  }),
+                  "sm:col-span-2",
+                )}
+                {tile("flipUp", 2, "organisation", field("organisation", "Organisation", ({ value }) => <OrgIcon value={value} />, { autoComplete: "organization" }))}
+                {tile("fromRight", 3, "job_title", field("job_title", "Fonction", ({ focused }) => <JobIcon focused={focused} />, { autoComplete: "organization-title" }))}
+                {tile(
+                  "zoom",
+                  4,
+                  "country",
+                  <CountryPicker
                     value={values.country}
-                    aria-invalid={countryErr ? true : undefined}
-                    aria-describedby={countryErr ? "country-error" : undefined}
-                    onChange={(e) => {
-                      update("country", e.target.value);
+                    error={visibleError("country")}
+                    onChange={(c) => {
+                      // Le préfixe téléphonique suit le pays tant que le numéro n'est pas commencé.
+                      const onlyPrefix = Object.values(PREFIX).includes(values.phone) || values.phone === "";
+                      update("country", c);
+                      if (onlyPrefix && values.phone) update("phone", PREFIX[c] ?? "");
                       setTouched((t) => ({ ...t, country: true }));
                     }}
-                    onBlur={() => setTouched((t) => ({ ...t, country: true }))}
-                    className={`${inputCls} appearance-none bg-[length:16px] bg-[right_1rem_center] bg-no-repeat pr-10 ${countryErr ? "border-danger" : "border-line"}`}
-                    style={{
-                      backgroundImage:
-                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23073B32' stroke-width='1.8'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E\")",
-                    }}
-                  >
-                    <option value="">Choisir…</option>
-                    <option value="BJ">Bénin</option>
-                    <option value="NE">Niger</option>
-                    <option value="other">Autre</option>
-                  </select>
-                  {countryErr && (
-                    <p id="country-error" className="mt-2 text-small text-danger">
-                      {countryErr}
-                    </p>
-                  )}
-                </div>
-                {field("phone", "Téléphone", { type: "tel", autoComplete: "tel", inputMode: "tel", optional: true })}
+                  />,
+                  "sm:col-span-2",
+                )}
+                {tile(
+                  "wipe",
+                  5,
+                  "phone",
+                  field("phone", "Téléphone", ({ focused }) => <PhoneIcon focused={focused} />, {
+                    type: "tel",
+                    autoComplete: "tel",
+                    inputMode: "tel",
+                    optional: true,
+                    placeholder: "01 23 45 67 89",
+                    onFocus: () => {
+                      if (!values.phone && PREFIX[values.country]) update("phone", PREFIX[values.country]!);
+                    },
+                    onBlur: () => {
+                      if (Object.values(PREFIX).includes(values.phone)) update("phone", "");
+                    },
+                  }),
+                  "sm:col-span-2",
+                )}
               </div>
 
               {/* Pot de miel anti-robots : invisible et ignoré par les humains. */}
@@ -256,39 +275,25 @@ export function Registration() {
                 />
               </div>
 
-              <label className="mt-6 flex cursor-pointer items-start gap-3 text-small text-ink">
-                <input
-                  type="checkbox"
-                  name="marketing_consent"
+              {tile(
+                "fade",
+                6,
+                null,
+                <ConsentCheck
                   checked={values.marketing_consent}
-                  onChange={(e) => update("marketing_consent", e.target.checked)}
-                  className="mt-0.5 h-5 w-5 shrink-0 accent-forest"
-                />
-                <span>
-                  J'accepte de recevoir d'autres communications d'{organizerNames(event)}.{" "}
-                  <span className="text-ink-muted">(facultatif)</span>
-                </span>
-              </label>
+                  onChange={(v) => update("marketing_consent", v)}
+                  label={`J'accepte de recevoir d'autres communications d'${organizerNames(event)}.`}
+                />,
+                "mt-4",
+              )}
 
-              <button
-                type="submit"
-                disabled={busy}
-                aria-disabled={!backendConfigured || busy}
-                aria-describedby={backendConfigured ? undefined : "registration-status"}
-                className="mt-8 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full bg-forest px-6 text-center text-body font-semibold text-paper transition-colors hover:bg-forest-deep disabled:cursor-wait aria-disabled:cursor-not-allowed aria-disabled:bg-forest/80"
-              >
-                {busy && (
-                  <span
-                    aria-hidden="true"
-                    className="h-4 w-4 animate-spin rounded-full border-2 border-paper/40 border-t-paper motion-reduce:animate-none"
-                  />
-                )}
-                {!backendConfigured
-                  ? "Les inscriptions ouvriront très bientôt"
-                  : busy
-                    ? "Envoi en cours…"
-                    : "Réserver ma place"}
-              </button>
+              {tile(
+                "spring",
+                7,
+                null,
+                <SubmitButton busy={busy} open={backendConfigured} />,
+                "mt-8",
+              )}
               <div id="registration-status" role="status" className="mt-4 text-small empty:hidden">
                 {outcome.kind === "closed" && (
                   <p className="text-ink-muted">
