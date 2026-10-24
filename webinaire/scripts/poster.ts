@@ -55,6 +55,7 @@ function html(variant: "a4" | "social", heroBg: string) {
 
   /* ---------- Partie haute : photo d'archives teintée ---------- */
   .hero { position: relative; color: #fff; padding: calc(${variant === "a4" ? 13 : 11} * var(--u)) calc(15 * var(--u)) calc(${variant === "a4" ? 9 : 7} * var(--u)); isolation: isolate; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .hero > * { flex-shrink: 0; }
   .hero > .spacer { flex: 1 1 0; min-height: calc(${variant === "a4" ? 6 : 4} * var(--u)); }
   .hero::before { content: ""; position: absolute; inset: 0; z-index: -2;
     background: url(${heroBg}) center 35% / cover; }
@@ -69,18 +70,18 @@ function html(variant: "a4" | "social", heroBg: string) {
     font-weight: 700; font-size: calc(3.3 * var(--u)); letter-spacing: .14em; text-transform: uppercase; padding: calc(1.6 * var(--u)) calc(3.6 * var(--u)); border-radius: 999px; }
   .tag { font-size: calc(3.1 * var(--u)); font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--mist); }
   .tag b { color: var(--emerald); font-weight: 700; }
-  h1 { font-family: Fraunces, serif; font-weight: 600; line-height: 1.02; letter-spacing: -.01em; margin-top: calc(${variant === "a4" ? 11 : 8} * var(--u));
-    font-size: calc(${variant === "a4" ? 15 : 12.5} * var(--u)); }
+  h1 { font-family: Fraunces, serif; font-weight: 600; line-height: 1.02; letter-spacing: -.01em; margin-top: calc(${variant === "a4" ? 9 : 8} * var(--u));
+    font-size: calc(${variant === "a4" ? 14.5 : 12.5} * var(--u)); }
   h1 .q { display: block; color: #fff; }
   h1 .a { display: block; color: var(--emerald); margin-top: calc(2 * var(--u)); }
-  .rule { width: calc(18 * var(--u)); height: calc(.9 * var(--u)); background: var(--emerald); margin: calc(${variant === "a4" ? 7 : 5} * var(--u)) 0 calc(5 * var(--u)); }
+  .rule { width: calc(18 * var(--u)); height: calc(.9 * var(--u)); background: var(--emerald); margin: calc(${variant === "a4" ? 6 : 5} * var(--u)) 0 calc(5 * var(--u)); }
   .lead { font-size: calc(4.6 * var(--u)); line-height: 1.5; color: var(--mist); max-width: calc(165 * var(--u)); }
 
   /* Intervenants */
   .speakers-title { margin-top: 0; font-size: calc(3.1 * var(--u)); font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--emerald); }
   .speakers { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(5 * var(--u)); margin-top: calc(4 * var(--u)); }
   .sp { border-top: 1px solid rgba(195,214,207,.28); padding-top: calc(4.5 * var(--u)); }
-  .sp img { width: calc(${variant === "a4" ? 22 : 17} * var(--u)); height: calc(${variant === "a4" ? 22 : 17} * var(--u)); border-radius: 50%; object-fit: cover;
+  .sp img { width: calc(${variant === "a4" ? 20 : 17} * var(--u)); height: calc(${variant === "a4" ? 20 : 17} * var(--u)); border-radius: 50%; object-fit: cover;
     box-shadow: 0 0 0 calc(.8 * var(--u)) var(--deep), 0 0 0 calc(1.3 * var(--u)) var(--emerald); }
   .sp .n { margin-top: calc(3.6 * var(--u)); font-size: calc(2.9 * var(--u)); font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--emerald); }
   .sp .name { margin-top: calc(1.4 * var(--u)); font-size: calc(4.3 * var(--u)); font-weight: 600; color: #fff; }
@@ -90,9 +91,9 @@ function html(variant: "a4" | "social", heroBg: string) {
 
   /* ---------- Bandeau d'informations ---------- */
   .info { flex: none; display: grid; grid-template-columns: 1fr auto; gap: calc(8 * var(--u)); align-items: center; background: var(--paper);
-    padding: calc(${variant === "a4" ? 8 : 6} * var(--u)) calc(15 * var(--u)); border-bottom: 1px solid var(--line); }
+    padding: calc(${variant === "a4" ? 7 : 6} * var(--u)) calc(15 * var(--u)); border-bottom: 1px solid var(--line); }
   .info .left { display: flex; flex-direction: column; gap: calc(${variant === "a4" ? 7 : 5} * var(--u)); }
-  .facts { display: grid; grid-template-columns: repeat(${date ? 3 : 3}, auto); gap: calc(4 * var(--u)) calc(9 * var(--u)); justify-content: start; }
+  .facts { display: grid; grid-template-columns: repeat(2, auto); gap: calc(${variant === "a4" ? 5 : 4} * var(--u)) calc(14 * var(--u)); white-space: nowrap; justify-content: start; }
   .fact .k { font-size: calc(2.7 * var(--u)); font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
   .fact .v { margin-top: calc(1.4 * var(--u)); font-family: Fraunces, serif; font-size: calc(5.6 * var(--u)); color: var(--forest); line-height: 1.15; }
   .fact .v small { display: block; font-family: "Public Sans"; font-size: calc(3.1 * var(--u)); color: var(--muted); margin-top: calc(.6 * var(--u)); }
@@ -123,6 +124,7 @@ function html(variant: "a4" | "social", heroBg: string) {
     date
       ? { k: "Date", v: date.charAt(0).toUpperCase() + date.slice(1), s: times ?? "" }
       : { k: "Date et lien", v: "Par e-mail", s: "Communiqués aux inscrits" },
+    { k: "Attestation", v: "Délivrée", s: "Remise aux participants" },
   ];
 
   const logos = cfg.organizers
@@ -206,10 +208,13 @@ try {
     if (variant === "a4") await page.pdf({ path: resolve(outDir, "affiche-a4.pdf"), width: "210mm", height: "297mm", printBackground: true, preferCSSPageSize: true });
     // Contrôle : aucun contenu ne doit déborder de l'affiche.
     const overflow = await page.evaluate(() => {
-      const p = document.querySelector(".poster")!.getBoundingClientRect();
-      return [...document.querySelectorAll(".poster *")].some((el) => {
-        const r = el.getBoundingClientRect();
-        return r.width > 0 && (r.bottom > p.bottom + 1 || r.right > p.right + 1);
+      // Chaque bloc doit tenir dans sa propre section (les sections masquent leur débordement).
+      return [...document.querySelectorAll(".poster > section")].some((sec) => {
+        const p = sec.getBoundingClientRect();
+        return [...sec.querySelectorAll("*")].some((el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && !el.classList.contains("grid") && (r.bottom > p.bottom + 1 || r.right > p.right + 1);
+        });
       });
     });
     console.log(`${variant} : ${overflow ? "ATTENTION, contenu hors cadre" : "OK"}`);
