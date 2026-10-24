@@ -8,3 +8,6 @@ supabase/functions/.env
 supabase/.temp/
 supabase/.branches/
 .vercel/
+
+# Affiche : HTML intermédiaire, régénéré par npm run poster
+poster/*.html

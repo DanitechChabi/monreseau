@@ -11,7 +11,8 @@
     "test": "npm run build && vitest run",
     "test:db": "bash scripts/test-db-local.sh",
     "check:functions": "deno check --import-map supabase/functions/import_map.json supabase/functions/*/index.ts",
-    "embed-assets": "vite-node scripts/embed-assets.ts"
+    "embed-assets": "vite-node scripts/embed-assets.ts",
+    "poster": "vite-node scripts/poster.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -36,6 +37,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",
     "pg": "^8.23.1",
+    "playwright-core": "^1.63.0",
     "tailwindcss": "^4.3.3",
     "typescript": "5.8",
     "vite": "^7.3.7",
